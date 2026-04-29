@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pictor – Creator Registration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Light Theme (Default) */
+    :root {
+      --bg-gradient-start: #fdfbf7;
+      --bg-gradient-end: #f0ebe2;
+      --warm:    #f2ece1;
+      --ink:     #1a1614;
+      --muted:   #7a6f68;
+      --accent:  #e05c3a;
+      --creator: #e05c3a;
+      --consumer: #6b7fd4;
+      --border:  #e4ddd5;
+      --white:   #ffffff;
+      --error:   #d94040;
+      --success: #2a7a3b;
+      --r:       16px;
+      --shadow:  0 8px 32px rgba(0,0,0,.08);
+      --card-bg: rgba(255,255,255,0.9);
+      --input-bg: #faf7f2;
+      --transition: all 0.3s ease;
+      --blob-opacity: 0.2;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-gradient-start: #0f0f1a;
+      --bg-gradient-end: #1a1a2e;
+      --warm:    #16213e;
+      --ink:     #eeeeee;
+      --muted:   #a0a0a0;
+      --accent:  #e05c3a;
+      --creator: #e05c3a;
+      --consumer: #6b7fd4;
+      --border:  #2a2a4a;
+      --white:   #0f0f1a;
+      --error:   #ff6b6b;
+      --success: #6bdf6b;
+      --shadow:  0 8px 32px rgba(0,0,0,.3);
+      --card-bg: rgba(22,33,62,0.95);
+      --input-bg: #1a1a2e;
+      --blob-opacity: 0.15;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(224,92,58,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(107,127,212,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Theme Toggle Button - MOVED LEFT */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 80px;
+      z-index: 1000;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.05);
+    }
+
+    .theme-toggle svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: var(--ink);
+      stroke-width: 2;
+    }
+
+    /* Decorative background blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: var(--blob-opacity);
+      pointer-events: none;
+      z-index: 0;
+      transition: var(--transition);
+    }
+    .blob-1 {
+      width: 500px;
+      height: 500px;
+      background: var(--accent);
+      top: -200px;
+      right: -150px;
+    }
+    .blob-2 {
+      width: 450px;
+      height: 450px;
+      background: var(--consumer);
+      bottom: -150px;
+      left: -120px;
+    }
+    .blob-3 {
+      width: 300px;
+      height: 300px;
+      background: #e05c3a;
+      top: 40%;
+      left: -100px;
+      opacity: 0.1;
+    }
+
+    .card {
+      position: relative;
+      z-index: 10;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 480px;
+      padding: 44px 40px 40px;
+      animation: fadeUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) both;
+      transition: var(--transition);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo a {
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+      transition: var(--transition);
+      display: inline-block;
+      cursor: pointer;
+    }
+    .logo a:hover {
+      transform: scale(1.02);
+    }
+    .logo a span { 
+      background: linear-gradient(135deg, var(--accent), var(--consumer));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(224,92,58,0.1);
+      color: var(--creator);
+      border: 1px solid rgba(224,92,58,0.3);
+      border-radius: 100px;
+      padding: 8px 16px;
+      font-size: .8rem;
+      font-weight: 600;
+      margin-bottom: 28px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+      margin-bottom: 8px;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 16px;
+      width: 18px;
+      height: 18px;
+      color: var(--muted);
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px 14px 48px;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      background: var(--input-bg);
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: 1rem;
+      color: var(--ink);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus {
+      border-color: var(--creator);
+      box-shadow: 0 0 0 3px rgba(224,92,58,.15);
+      background: var(--card-bg);
+    }
+
+    input::placeholder { color: #b0a89e; opacity: 0.5; }
+
+    .eye-btn {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+      border-radius: 8px;
+    }
+    .eye-btn svg { width: 18px; height: 18px; }
+    .eye-btn:hover { color: var(--ink); background: var(--warm); }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .checkbox-group input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--creator);
+    }
+
+    .checkbox-group label {
+      margin-bottom: 0;
+      text-transform: none;
+      font-weight: 400;
+      font-size: .85rem;
+      color: var(--muted);
+      font-family: 'Caveat', 'Amatic SC', cursive;
+    }
+
+    .checkbox-group a {
+      color: var(--creator);
+      text-decoration: none;
+    }
+
+    .checkbox-group a:hover {
+      text-decoration: underline;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--creator), #c94e31);
+      transition: all 0.25s ease;
+      letter-spacing: .01em;
+      margin-top: 8px;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(224,92,58,.35);
+    }
+    .submit-btn:active { transform: scale(.98); }
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .card-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: .9rem;
+      color: var(--muted);
+      font-family: 'Caveat', 'Amatic SC', cursive;
+    }
+    .card-footer a {
+      color: var(--creator);
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .card-footer a:hover { text-decoration: underline; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 20px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .alert {
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      display: none;
+      font-size: .9rem;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+      font-weight: 500;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-success {
+      background: rgba(42, 122, 59, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(42, 122, 59, 0.3);
+    }
+    .alert-error {
+      background: rgba(217, 64, 64, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(217, 64, 64, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Decorative blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </button>
+
+  <div class="card">
+    <!-- Logo -->
+    <div class="logo">
+      <a href="#" onclick="window.location.reload(); return false;">Pict<span>o</span>r</a>
+    </div>
+
+    <div class="badge">Creator Account Registration</div>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="creatorRegisterForm">
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="fullname">Full Name</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input type="text" id="fullname" placeholder="Your full name" autocomplete="name" />
+        </div>
+      </div>
+
+      <!-- Username -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input type="text" id="username" placeholder="@creatorname" autocomplete="username" />
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input type="email" id="email" placeholder="creator@example.com" autocomplete="email" />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input type="password" id="password" placeholder="Create a strong password" autocomplete="new-password" />
+          <button class="eye-btn" type="button" id="togglePassword">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input type="password" id="confirmPassword" placeholder="Confirm your password" autocomplete="off" />
+          <button class="eye-btn" type="button" id="toggleConfirmPassword">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div class="checkbox-group">
+        <input type="checkbox" id="termsCheckbox" />
+        <label for="termsCheckbox">
+          I agree to the <a href="#">Creator Terms</a> and <a href="#">Content Guidelines</a>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn" id="submitBtn">
+        Create Creator Account
+      </button>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>Already a creator?</span>
+      </div>
+
+      <!-- Login Link -->
+      <div class="card-footer">
+        <a href="login.html">Sign in to your creator account</a>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    // ============================================
+    // DARK/LIGHT MODE FUNCTIONALITY
+    // ============================================
+    
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    function updateThemeIcon() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const toggleBtn = document.getElementById('themeToggle');
+      if (toggleBtn) {
+        if (theme === 'dark') {
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>`;
+        } else {
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>`;
+        }
+      }
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon();
+    }
+    
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    updateThemeIcon();
+    
+    // ============================================
+    // REGISTRATION FUNCTIONALITY
+    // ============================================
+
+    // Toggle password visibility
+    function togglePasswordVisibility(inputId) {
+      const input = document.getElementById(inputId);
+      const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+      input.setAttribute('type', type);
+    }
+
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      togglePasswordVisibility('password');
+    });
+
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+      togglePasswordVisibility('confirmPassword');
+    });
+
+    function showAlert(message, type) {
+      const alertDiv = document.getElementById('alert');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+      alertDiv.style.display = 'block';
+      setTimeout(() => {
+        alertDiv.style.display = 'none';
+      }, 4000);
+    }
+
+    document.getElementById('creatorRegisterForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const fullname = document.getElementById('fullname').value;
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const termsAccepted = document.getElementById('termsCheckbox').checked;
+
+      // Validation
+      if (!fullname || !username || !email || !password) {
+        showAlert('Please fill in all fields', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showAlert('Passwords do not match', 'error');
+        return;
+      }
+
+      if (!termsAccepted) {
+        showAlert('Please accept the Creator Terms and Content Guidelines', 'error');
+        return;
+      }
+
+      // Show loading state
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Creating account...';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/creator/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullname, username, email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Store token and user info
+          localStorage.setItem('jwt_token', data.token);
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+          showAlert(`Creator account created! Welcome, ${fullname}!`, 'success');
+
+          setTimeout(() => {
+            window.location.href = 'creator.html';
+          }, 1500);
+        } else {
+          showAlert(data.message || 'Registration failed', 'error');
+        }
+      } catch (error) {
+        showAlert('Cannot connect to server. Make sure Flask is running on http://127.0.0.1:5000', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
