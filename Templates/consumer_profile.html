@@ -531,6 +531,9 @@
     // PROFILE FUNCTIONALITY
     // ============================================
     
+    // API BASE URL - CHANGE THIS TO YOUR AZURE BACKEND URL
+    const API_BASE_URL = 'https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net';
+    
     let authToken = localStorage.getItem('jwt_token');
     let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
@@ -566,21 +569,21 @@
     async function loadProfileData() {
       try {
         // Load saved posts
-        const savedResponse = await fetch('http://127.0.0.1:5000/api/user/saved', {
+        const savedResponse = await fetch(`${API_BASE_URL}/api/user/saved`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const savedData = await savedResponse.json();
         if (savedData.success) savedPosts = savedData.posts;
         
         // Load liked posts
-        const likedResponse = await fetch('http://127.0.0.1:5000/api/user/liked', {
+        const likedResponse = await fetch(`${API_BASE_URL}/api/user/liked`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const likedData = await likedResponse.json();
         if (likedData.success) likedPosts = likedData.posts;
         
         // Load following list
-        const followingResponse = await fetch('http://127.0.0.1:5000/api/user/follows', {
+        const followingResponse = await fetch(`${API_BASE_URL}/api/user/follows`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const followingData = await followingResponse.json();

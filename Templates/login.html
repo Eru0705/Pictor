@@ -388,12 +388,12 @@
 </head>
 <body>
 
-  <!-- Decorative blobs -->
+  
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
 
-  <!-- Theme Toggle Button -->
+  
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
@@ -467,6 +467,11 @@
   </div>
 
   <script>
+    // ============================================
+    // AZURE BACKEND URL
+    // ============================================
+    const API_BASE_URL = "https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net";
+    
     // ============================================
     // DARK/LIGHT MODE FUNCTIONALITY
     // ============================================
@@ -574,7 +579,7 @@
       submitBtn.disabled = true;
       
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/login', {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -606,7 +611,7 @@
         }
       } catch (error) {
         console.error('Login error:', error);
-        showAlert('Cannot connect to server. Make sure Flask is running on http://127.0.0.1:5000', 'error');
+        showAlert('Cannot connect to server. Make sure Flask is running on ' + API_BASE_URL, 'error');
       } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;

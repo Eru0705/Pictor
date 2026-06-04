@@ -493,7 +493,8 @@
             gap: 10px;
         }
         .c-avatar-me {
-            width: 32px; height: 32px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent), var(--blue));
             display: flex;
@@ -688,7 +689,7 @@
         <a class="nav-avatar" href="#" id="avatarDisplay">YO</a>
     </nav>
 
-    <!-- Search Bar - Hidden initially, shows only on Search Results tab -->
+    <!-- Search Bar - Hidden initially, shown only on Search Results tab -->
     <div class="search-section" id="searchSection">
         <div class="search-input-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -741,6 +742,9 @@
     </nav>
 
     <script>
+        // Azure Backend URL
+        const API_BASE_URL = "https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net";
+        
         // ============================================
         // DARK/LIGHT MODE
         // ============================================
@@ -823,7 +827,7 @@
             const endpoint = isFollowing ? '/api/unfollow' : '/api/follow';
             
             try {
-                const data = await apiCall(`http://127.0.0.1:5000${endpoint}`, {
+                const data = await apiCall(`${API_BASE_URL}${endpoint}`, {
                     method: 'POST',
                     body: JSON.stringify({ creator_id: creatorId })
                 });
@@ -853,7 +857,7 @@
 
         async function toggleLikeAction(btn, postId) {
             try {
-                const data = await apiCall('http://127.0.0.1:5000/api/like', {
+                const data = await apiCall(`${API_BASE_URL}/api/like`, {
                     method: 'POST',
                     body: JSON.stringify({ post_id: postId })
                 });
@@ -870,7 +874,7 @@
 
         async function toggleSaveAction(btn, postId) {
             try {
-                const data = await apiCall('http://127.0.0.1:5000/api/save', {
+                const data = await apiCall(`${API_BASE_URL}/api/save`, {
                     method: 'POST',
                     body: JSON.stringify({ post_id: postId })
                 });
@@ -893,7 +897,7 @@
             commentList.innerHTML = '<div style="padding: 10px; text-align: center;">Loading comments...</div>';
             
             try {
-                const data = await apiCall(`http://127.0.0.1:5000/api/comments/${postId}`);
+                const data = await apiCall(`${API_BASE_URL}/api/comments/${postId}`);
                 
                 if (data.success && data.comments && data.comments.length > 0) {
                     commentList.innerHTML = data.comments.map(comment => `
@@ -922,7 +926,7 @@
             if (!text) return;
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/comments', {
+                const response = await fetch(`${API_BASE_URL}/api/comments`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1042,7 +1046,7 @@
             if (searchSection) searchSection.style.display = 'none';
             
             try {
-                const data = await apiCall('http://127.0.0.1:5000/api/explore/posts');
+                const data = await apiCall(`${API_BASE_URL}/api/explore/posts`);
                 if (data.success) {
                     renderPosts(data.posts, 'mainContent');
                 } else {
@@ -1062,7 +1066,7 @@
             document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Searching...</h3></div>';
             
             try {
-                const data = await apiCall(`http://127.0.0.1:5000/api/search/creators?q=${encodeURIComponent(query)}`);
+                const data = await apiCall(`${API_BASE_URL}/api/search/creators?q=${encodeURIComponent(query)}`);
                 
                 if (data.success && data.results.length > 0) {
                     document.getElementById('mainContent').innerHTML = data.results.map(creator => `
@@ -1091,7 +1095,7 @@
             document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Loading profile...</h3></div>';
             
             try {
-                const data = await apiCall(`http://127.0.0.1:5000/api/creator/profile/${creatorId}`);
+                const data = await apiCall(`${API_BASE_URL}/api/creator/profile/${creatorId}`);
                 
                 if (data.success) {
                     const creator = data.creator;
@@ -1178,4 +1182,4 @@
         loadExplore();
     </script>
 </body>
-</html> 
+</html>

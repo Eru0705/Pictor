@@ -713,6 +713,11 @@
 
   <script>
     // ============================================
+    // AZURE BACKEND URL
+    // ============================================
+    const API_BASE_URL = "https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net";
+    
+    // ============================================
     // DARK/LIGHT MODE FUNCTIONALITY
     // ============================================
     
@@ -767,7 +772,7 @@
       if (translateBtn) translateBtn.innerHTML = '🔄...';
       
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/translate', {
+        const response = await fetch(`${API_BASE_URL}/api/translate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -848,7 +853,7 @@
       const endpoint = isFollowing ? '/api/unfollow' : '/api/follow';
       
       try {
-        const response = await fetch(`http://127.0.0.1:5000${endpoint}`, {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -882,7 +887,7 @@
       container.innerHTML = '<div class="empty-state"><h3>Loading feed...</h3></div>';
       
       try {
-        const data = await apiCall(`http://127.0.0.1:5000/api/feed?type=following`);
+        const data = await apiCall(`${API_BASE_URL}/api/feed?type=following`);
         
         if (!data.success || data.posts.length === 0) {
           container.innerHTML = `
@@ -902,7 +907,7 @@
         
         let userFollows = {};
         try {
-          const followsData = await apiCall('http://127.0.0.1:5000/api/user/follows');
+          const followsData = await apiCall(`${API_BASE_URL}/api/user/follows`);
           if (followsData.success) {
             followsData.follows.forEach(f => { userFollows[f.creator_id] = true; });
           }
@@ -1009,7 +1014,7 @@
 
     async function toggleLikeAction(btn, postId) {
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/like', {
+        const response = await fetch(`${API_BASE_URL}/api/like`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1043,7 +1048,7 @@
 
     async function toggleSaveAction(btn, postId) {
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/save', {
+        const response = await fetch(`${API_BASE_URL}/api/save`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1070,7 +1075,7 @@
       commentList.innerHTML = '<div style="padding: 10px; text-align: center;">Loading comments...</div>';
       
       try {
-        const data = await apiCall(`http://127.0.0.1:5000/api/comments/${postId}`);
+        const data = await apiCall(`${API_BASE_URL}/api/comments/${postId}`);
         
         if (data.success && data.comments.length > 0) {
           commentList.innerHTML = data.comments.map(comment => {
@@ -1136,7 +1141,7 @@
       section.querySelector('.comment-send').innerHTML = '...';
       
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/comments', {
+        const response = await fetch(`${API_BASE_URL}/api/comments`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

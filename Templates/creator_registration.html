@@ -512,6 +512,11 @@
 
   <script>
     // ============================================
+    // AZURE BACKEND URL
+    // ============================================
+    const API_BASE_URL = "https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net";
+    
+    // ============================================
     // DARK/LIGHT MODE FUNCTIONALITY
     // ============================================
     
@@ -615,7 +620,7 @@
       submitBtn.disabled = true;
 
       try {
-        const response = await fetch('http://127.0.0.1:5000/api/creator/register', {
+        const response = await fetch(`${API_BASE_URL}/api/creator/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fullname, username, email, password })
@@ -637,7 +642,7 @@
           showAlert(data.message || 'Registration failed', 'error');
         }
       } catch (error) {
-        showAlert('Cannot connect to server. Make sure Flask is running on http://127.0.0.1:5000', 'error');
+        showAlert('Cannot connect to server. Make sure Flask is running on ' + API_BASE_URL, 'error');
       } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
