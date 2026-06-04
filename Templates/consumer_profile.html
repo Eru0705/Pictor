@@ -31,7 +31,6 @@
       --blob-opacity: 0.2;
     }
 
-    /* Dark Theme */
     [data-theme="dark"] {
       --bg-gradient-start: #0f0f1a;
       --bg-gradient-end: #1a1a2e;
@@ -186,7 +185,7 @@
       z-index: 10;
     }
 
-    /* Profile Header */
+    
     .profile-header {
       background: var(--card-bg);
       backdrop-filter: blur(10px);
@@ -254,7 +253,7 @@
       color: var(--muted);
     }
 
-    /* Post Cards */
+    
     .post-card {
       background: var(--card-bg);
       backdrop-filter: blur(10px);
@@ -356,7 +355,6 @@
     .post-tags { margin-top: 6px; font-size: .8rem; color: var(--blue); }
     .post-time { margin-top: 6px; font-size: .7rem; color: var(--muted); }
 
-    /* Creator Card for Following list */
     .creator-card {
       background: var(--card-bg);
       backdrop-filter: blur(10px);
@@ -531,8 +529,8 @@
     // PROFILE FUNCTIONALITY
     // ============================================
     
-    // API BASE URL - CHANGE THIS TO YOUR AZURE BACKEND URL
-    const API_BASE_URL = 'https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net';
+  
+    const API_BASE_URL = '';
     
     let authToken = localStorage.getItem('jwt_token');
     let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');

@@ -172,7 +172,9 @@ def generate_image_caption(image_url):
 # ============================================
 # JWT SECRET
 # ============================================
-app.config['SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-super-secret-key-change-this')
+app.config['SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+if not app.config['SECRET_KEY']:
+    raise ValueError("JWT_SECRET_KEY environment variable is not set")
 
 
 # ============================================
@@ -400,9 +402,7 @@ def login():
     }), 200
 
 
-# ============================================
-# CONSUMER REGISTRATION API
-# ============================================
+
 @app.route('/api/register', methods=['POST'])
 def register_consumer():
     data = request.get_json()
