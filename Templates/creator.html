@@ -549,6 +549,11 @@
 
     <script>
         // ============================================
+        // AZURE BACKEND URL
+        // ============================================
+        const API_BASE_URL = "https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net";
+        
+        // ============================================
         // DARK/LIGHT MODE FUNCTIONALITY
         // ============================================
         
@@ -616,7 +621,7 @@
 
         async function loadMyPosts() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/creator/posts', {
+                const response = await fetch(`${API_BASE_URL}/api/creator/posts`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`
                     }
@@ -676,7 +681,7 @@
             if (!confirm('Are you sure you want to delete this post?')) return;
             
             try {
-                const response = await fetch(`http://127.0.0.1:5000/api/creator/post/${postId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/creator/post/${postId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${authToken}`
@@ -728,7 +733,7 @@
             try {
                 // Step 1: Get SAS upload URL to temporarily upload image
                 const fileExt = mediaFile.name.split('.').pop();
-                const sasResponse = await fetch(`http://127.0.0.1:5000/api/get-upload-url?ext=${fileExt}`, {
+                const sasResponse = await fetch(`${API_BASE_URL}/api/get-upload-url?ext=${fileExt}`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const sasData = await sasResponse.json();
@@ -749,7 +754,7 @@
                 }
                 
                 // Step 3: Request AI caption from backend
-                const captionResponse = await fetch('http://127.0.0.1:5000/api/image/caption', {
+                const captionResponse = await fetch(`${API_BASE_URL}/api/image/caption`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -843,7 +848,7 @@
             try {
                 // Step 1: Get SAS upload URL from backend
                 console.log("Step 1: Getting SAS URL...");
-                const sasResponse = await fetch(`http://127.0.0.1:5000/api/get-upload-url?ext=${fileExt}`, {
+                const sasResponse = await fetch(`${API_BASE_URL}/api/get-upload-url?ext=${fileExt}`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const sasData = await sasResponse.json();
@@ -869,7 +874,7 @@
                 // Step 3: Send metadata to backend with blob URL
                 console.log("Step 3: Sending metadata to backend...");
                 submitBtn.textContent = 'Publishing...';
-                const metadataResponse = await fetch('http://127.0.0.1:5000/api/creator/upload', {
+                const metadataResponse = await fetch(`${API_BASE_URL}/api/creator/upload`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
