@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pictor – Feed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Light Theme (Default) */
+    :root {
+      --bg-gradient-start: #fdfbf7;
+      --bg-gradient-end: #f0ebe2;
+      --warm:    #f2ece1;
+      --ink:     #1a1614;
+      --muted:   #7a6f68;
+      --accent:  #e05c3a;
+      --heart:   #e8304a;
+      --blue:    #6b7fd4;
+      --border:  #e4ddd5;
+      --white:   #ffffff;
+      --error:   #d94040;
+      --success: #2a7a3b;
+      --r:       16px;
+      --shadow:  0 8px 32px rgba(0,0,0,.08);
+      --card-bg: rgba(255,255,255,0.9);
+      --input-bg: #faf7f2;
+      --transition: all 0.3s ease;
+      --blob-opacity: 0.2;
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg-gradient-start: #0f0f1a;
+      --bg-gradient-end: #1a1a2e;
+      --warm:    #16213e;
+      --ink:     #eeeeee;
+      --muted:   #a0a0a0;
+      --accent:  #e05c3a;
+      --heart:   #ff6b6b;
+      --blue:    #6b7fd4;
+      --border:  #2a2a4a;
+      --white:   #0f0f1a;
+      --error:   #ff6b6b;
+      --success: #6bdf6b;
+      --shadow:  0 8px 32px rgba(0,0,0,.3);
+      --card-bg: rgba(22,33,62,0.95);
+      --input-bg: #1a1a2e;
+      --blob-opacity: 0.15;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      color: var(--ink);
+      min-height: 100vh;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(224,92,58,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(107,127,212,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 80px;
+      z-index: 1000;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { transform: scale(1.05); }
+    .theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 2; }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: var(--blob-opacity);
+      pointer-events: none;
+      z-index: 0;
+      transition: var(--transition);
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -200px; right: -150px; }
+    .blob-2 { width: 450px; height: 450px; background: var(--blue); bottom: -150px; left: -120px; }
+    .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: -100px; opacity: 0.1; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      transition: var(--transition);
+    }
+
+    .nav-logo {
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .nav-logo span { 
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      border: 2px solid var(--border);
+      transition: var(--transition);
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      transition: all 0.2s ease;
+    }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px 90px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--muted);
+    }
+    .empty-state svg {
+      width: 48px; height: 48px;
+      opacity: .25;
+      margin-bottom: 14px;
+    }
+    .empty-state h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .post-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--white);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .post-meta { flex: 1; }
+    .post-username {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--ink);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .post-username:hover { color: var(--accent); }
+    .post-location {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .follow-btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+    }
+    .follow-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+    .follow-btn.following {
+      background: var(--warm);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .post-image-wrap {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: var(--warm);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .post-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .heart-burst {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      pointer-events: none;
+      opacity: 0;
+    }
+    .heart-burst svg { width: 88px; height: 88px; }
+    .heart-burst.pop {
+      animation: heartPop .65s cubic-bezier(.17,.89,.32,1.28) forwards;
+    }
+    @keyframes heartPop {
+      0%   { opacity: 0; transform: translate(-50%,-50%) scale(0); }
+      35%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+      65%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(.85); }
+    }
+
+    .tap-ripple {
+      position: absolute;
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: rgba(232,48,74,.18);
+      pointer-events: none;
+      transform: scale(0);
+      animation: ripple .38s ease-out forwards;
+    }
+    @keyframes ripple { to { transform: scale(4.5); opacity: 0; } }
+
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .act-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.2s ease;
+    }
+    .act-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .act-btn:hover { background: var(--warm); color: var(--ink); transform: translateY(-1px); }
+
+    .act-btn.liked {
+      border-color: var(--heart);
+      color: var(--heart);
+      background: rgba(232,48,74,0.1);
+    }
+    .act-btn.liked svg { fill: var(--heart); stroke: none; }
+
+    .act-btn.like-bounce { animation: bounce .32s cubic-bezier(.17,.89,.32,1.28); }
+    @keyframes bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+    .act-btn.saved {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(107,127,212,0.1);
+    }
+    .act-btn.saved svg { fill: var(--blue); stroke: none; }
+
+    .save-btn { margin-left: auto; }
+
+    /* Translation button styles */
+    .translate-btn {
+      background: none;
+      border: none;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 0.7rem;
+      margin-left: 8px;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      transition: var(--transition);
+    }
+    .translate-btn:hover {
+      text-decoration: underline;
+      color: var(--accent);
+    }
+
+    .language-select {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      color: var(--ink);
+      margin-left: 8px;
+      cursor: pointer;
+    }
+
+    .caption-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .post-body {
+      padding: 8px 16px 16px;
+    }
+    .post-caption {
+      font-size: .95rem;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+    .post-caption strong { font-weight: 700; margin-right: 4px; }
+    .post-tags { margin-top: 8px; font-size: .85rem; color: var(--blue); }
+    .post-time { margin-top: 6px; font-size: .75rem; color: var(--muted); }
+
+    .toggle-comments-link {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: .8rem;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      transition: var(--transition);
+    }
+    .toggle-comments-link:hover { color: var(--ink); }
+
+    .comments-section {
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: none;
+    }
+    .comments-section.open { display: block; }
+
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .c-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .comment-bubble {
+      flex: 1;
+      background: var(--warm);
+      border-radius: 12px;
+      padding: 8px 12px;
+    }
+    .comment-author { 
+      font-weight: 700; 
+      font-size: .8rem; 
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .comment-text { font-size: .85rem; margin-top: 2px; line-height: 1.4; }
+    .comment-time { font-size: .7rem; color: var(--muted); margin-top: 4px; }
+
+    /* Sentiment Badge Styles */
+    .sentiment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+    .sentiment-positive {
+      background: rgba(42, 122, 59, 0.15);
+      color: #2a7a3b;
+    }
+    .sentiment-negative {
+      background: rgba(217, 64, 64, 0.15);
+      color: #d94040;
+    }
+    .sentiment-neutral {
+      background: rgba(122, 111, 104, 0.15);
+      color: #7a6f68;
+    }
+    .sentiment-mixed {
+      background: rgba(224, 92, 58, 0.15);
+      color: #e05c3a;
+    }
+
+    .comment-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .c-avatar-me {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .comment-input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 40px;
+      background: var(--input-bg);
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: .9rem;
+      color: var(--ink);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .comment-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(107,127,212,.15);
+    }
+
+    .comment-send {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .comment-send:hover { transform: scale(1.05); }
+    .comment-send svg { width: 16px; height: 16px; }
+
+    .refresh-fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 40px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      color: var(--white);
+      cursor: pointer;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: .9rem;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+    }
+    .refresh-fab:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .refresh-fab:active { transform: scale(.96); }
+    .refresh-fab svg { width: 16px; height: 16px; }
+    .refresh-fab.spinning svg { animation: spin .6s linear; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 65px;
+      z-index: 100;
+      transition: var(--transition);
+    }
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 500;
+      padding: 8px 20px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    .nav-tab svg { width: 22px; height: 22px; }
+    .nav-tab.active { color: var(--accent); }
+    .nav-tab:hover { background: var(--warm); transform: translateY(-2px); }
+
+    .alert {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      padding: 12px 24px;
+      border-radius: 40px;
+      display: none;
+      font-size: .9rem;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      backdrop-filter: blur(10px);
+    }
+    .alert-success {
+      background: rgba(42, 122, 59, 0.9);
+      color: white;
+    }
+    .alert-error {
+      background: rgba(217, 64, 64, 0.9);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Decorative blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- Theme Toggle Button -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </button>
+
+  <div id="alert" class="alert"></div>
+
+  <nav class="top-nav">
+    <a class="nav-logo" href="#" onclick="window.location.reload(); return false;">Pict<span>o</span>r</a>
+    <a class="nav-avatar" href="#" id="avatarDisplay">YO</a>
+  </nav>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(this,'feed-following')">Following</button>
+    <button class="tab" onclick="switchTab(this,'feed-foryou')">For You</button>
+  </div>
+
+  <main>
+    <div id="feed-foryou">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="m21 15-5-5L5 21"/>
+        </svg>
+        <h3>Loading feed...</h3>
+      </div>
+    </div>
+  </main>
+
+  <button class="refresh-fab" id="refreshBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+    </svg>
+    Refresh
+  </button>
+
+  <nav class="bottom-nav">
+    <a class="nav-tab active" href="consumer.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Home
+    </a>
+    <a class="nav-tab" href="consumer_search.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      Search
+    </a>
+    <a class="nav-tab" href="consumer_profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      Profile
+    </a>
+  </nav>
+
+  <script>
+    // ============================================
+    // AZURE BACKEND URL
+    // ============================================
+    const API_BASE_URL = window.location.origin;
+    
+    // ============================================
+    // DARK/LIGHT MODE FUNCTIONALITY
+    // ============================================
+    
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    function updateThemeIcon() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const toggleBtn = document.getElementById('themeToggle');
+      if (toggleBtn) {
+        if (theme === 'dark') {
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>`;
+        } else {
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>`;
+        }
+      }
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon();
+    }
+    
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    updateThemeIcon();
+    
+    // ============================================
+    // TRANSLATION FUNCTIONALITY (AI FEATURE)
+    // ============================================
+    
+    async function translateCaption(postId, originalText, targetLang) {
+      const captionElement = document.getElementById(`caption-${postId}`);
+      const translateBtn = document.getElementById(`translate-btn-${postId}`);
+      
+      if (!captionElement) return;
+      
+      if (translateBtn) translateBtn.innerHTML = '🔄...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/translate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ 
+            text: originalText, 
+            target_language: targetLang 
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          if (!captionElement.getAttribute('data-original')) {
+            captionElement.setAttribute('data-original', captionElement.innerHTML);
+          }
+          captionElement.innerHTML = data.translated;
+          if (translateBtn) translateBtn.innerHTML = '🔄 Reset';
+        } else {
+          showAlert('Translation failed', 'error');
+          if (translateBtn) translateBtn.innerHTML = '🌐 Translate';
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        showAlert('Translation failed', 'error');
+        if (translateBtn) translateBtn.innerHTML = '🌐 Translate';
+      }
+    }
+    
+    function resetTranslation(postId) {
+      const captionElement = document.getElementById(`caption-${postId}`);
+      const translateBtn = document.getElementById(`translate-btn-${postId}`);
+      
+      if (captionElement && captionElement.getAttribute('data-original')) {
+        captionElement.innerHTML = captionElement.getAttribute('data-original');
+        if (translateBtn) translateBtn.innerHTML = '🌐 Translate';
+      }
+    }
+    
+    // ============================================
+    // CONSUMER FEED FUNCTIONALITY
+    // ============================================
+    
+    let authToken = localStorage.getItem('jwt_token');
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if (!authToken || !currentUser.user_id) {
+      window.location.href = 'login.html';
+    }
+
+    const avatarLetter = currentUser.email ? currentUser.email[0].toUpperCase() : 'YO';
+    document.getElementById('avatarDisplay').innerHTML = avatarLetter;
+
+    function showAlert(message, type) {
+      const alertDiv = document.getElementById('alert');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+      alertDiv.style.display = 'block';
+      setTimeout(() => {
+        alertDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    async function apiCall(url, options = {}) {
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      };
+      const response = await fetch(url, { ...defaultOptions, ...options });
+      return response.json();
+    }
+
+    async function toggleFollow(creatorId, btn) {
+      const isFollowing = btn.classList.contains('following');
+      const endpoint = isFollowing ? '/api/unfollow' : '/api/follow';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ creator_id: creatorId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          if (data.following) {
+            btn.classList.add('following');
+            btn.textContent = 'Following';
+            showAlert('Followed creator!', 'success');
+          } else {
+            btn.classList.remove('following');
+            btn.textContent = 'Follow';
+            showAlert('Unfollowed creator', 'success');
+          }
+          loadFeed('following');
+        } else {
+          showAlert(data.message || 'Action failed', 'error');
+        }
+      } catch (error) {
+        showAlert('Network error', 'error');
+      }
+    }
+
+    async function loadFeed(feedType = 'following') {
+      const container = document.getElementById('feed-foryou');
+      container.innerHTML = '<div class="empty-state"><h3>Loading feed...</h3></div>';
+      
+      try {
+        const data = await apiCall(`${API_BASE_URL}/api/feed?type=following`);
+        
+        if (!data.success || data.posts.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <h3>No followed creators yet</h3>
+              <p>Follow creators to see their posts here!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        let userFollows = {};
+        try {
+          const followsData = await apiCall(`${API_BASE_URL}/api/user/follows`);
+          if (followsData.success) {
+            followsData.follows.forEach(f => { userFollows[f.creator_id] = true; });
+          }
+        } catch(e) { console.log('Could not load follows'); }
+        
+        const html = data.posts.map(post => `
+          <article class="post-card" data-post-id="${post.post_id}">
+            <div class="post-header">
+              <div class="avatar">${post.creator_avatar || (post.creator_name ? post.creator_name[0].toUpperCase() : 'CR')}</div>
+              <div class="post-meta">
+                <a class="post-username" href="#">${escapeHtml(post.creator_name)}</a>
+                <div class="post-location">${escapeHtml(post.location || 'No location')}</div>
+              </div>
+              ${currentUser.role === 'consumer' && post.creator_id !== currentUser.user_id ? 
+                `<button class="follow-btn ${userFollows[post.creator_id] ? 'following' : ''}" onclick="toggleFollow('${post.creator_id}', this)">${userFollows[post.creator_id] ? 'Following' : 'Follow'}</button>` : ''
+              }
+            </div>
+            
+            <div class="post-image-wrap" data-post="${post.post_id}">
+              ${post.image_url ? `<img src="${post.image_url}" alt="${escapeHtml(post.title)}">` : '<div class="image-placeholder">Image loading...</div>'}
+              <div class="heart-burst" id="burst-${post.post_id}">
+                <svg viewBox="0 0 24 24"><path fill="#e8304a" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </div>
+            </div>
+
+            <div class="post-actions">
+              <button class="act-btn like-btn ${post.liked_by_user ? 'liked' : ''}" data-post-id="${post.post_id}" onclick="toggleLikeAction(this, '${post.post_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                Like
+              </button>
+
+              <button class="act-btn" onclick="toggleComments('c-${post.post_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Comment
+              </button>
+
+              <button class="act-btn save-btn ${post.saved_by_user ? 'saved' : ''}" data-post-id="${post.post_id}" onclick="toggleSaveAction(this, '${post.post_id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Save
+              </button>
+            </div>
+
+            <div class="post-body">
+              <div class="caption-container">
+                <p class="post-caption" id="caption-${post.post_id}"><strong>${escapeHtml(post.creator_name)}</strong> ${escapeHtml(post.caption || '')}</p>
+                <select class="language-select" id="lang-${post.post_id}" onchange="translateCaption('${post.post_id}', '${escapeHtml(post.caption || '').replace(/'/g, "\\'")}', this.value)">
+                  <option value="">🌐 Translate to...</option>
+                  <option value="es">🇪🇸 Spanish</option>
+                  <option value="fr">🇫🇷 French</option>
+                  <option value="de">🇩🇪 German</option>
+                  <option value="it">🇮🇹 Italian</option>
+                  <option value="pt">🇵🇹 Portuguese</option>
+                  <option value="ja">🇯🇵 Japanese</option>
+                  <option value="zh">🇨🇳 Chinese</option>
+                  <option value="hi">🇮🇳 Hindi</option>
+                  <option value="ar">🇸🇦 Arabic</option>
+                </select>
+                <button class="translate-btn" id="translate-btn-${post.post_id}" onclick="resetTranslation('${post.post_id}')">↺ Reset</button>
+              </div>
+              ${post.tags && post.tags.length > 0 ? `<p class="post-tags">${post.tags.map(t => escapeHtml(t)).join(' ')}</p>` : ''}
+              <p class="post-time">${formatDate(post.created_at)}</p>
+              <button class="toggle-comments-link" onclick="toggleComments('c-${post.post_id}')">View comments (${post.comments_count || 0})</button>
+            </div>
+
+            <div class="comments-section" id="c-${post.post_id}">
+              <div class="comment-list" id="cl-${post.post_id}"></div>
+              <div class="comment-input-row">
+                <div class="c-avatar-me">${avatarLetter}</div>
+                <input class="comment-input" type="text" placeholder="Write a comment…" onkeydown="handleEnter(event, 'c-${post.post_id}', '${post.post_id}')" />
+                <button class="comment-send" onclick="sendCommentAction('${post.post_id}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        `).join('');
+        
+        container.innerHTML = html;
+        setupDoubleTapLike();
+        
+      } catch (error) {
+        console.error('Error loading feed:', error);
+        container.innerHTML = '<div class="empty-state"><h3>Error loading feed</h3><p>Make sure Flask is running on port 5000</p></div>';
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Just now';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000 / 60 / 60 / 24);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff < 7) return `${diff} days ago`;
+      return date.toLocaleDateString();
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function toggleLikeAction(btn, postId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/like`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ post_id: postId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          btn.classList.toggle('liked');
+          const textNode = [...btn.childNodes].find(n => n.nodeType === 3);
+          if (textNode) textNode.textContent = data.liked ? ' Liked' : ' Like';
+          btn.classList.add('like-bounce');
+          setTimeout(() => btn.classList.remove('like-bounce'), 350);
+          
+          if (data.liked) {
+            const burst = document.getElementById(`burst-${postId}`);
+            if (burst) {
+              burst.classList.remove('pop');
+              void burst.offsetWidth;
+              burst.classList.add('pop');
+              setTimeout(() => burst.classList.remove('pop'), 700);
+            }
+          }
+        }
+      } catch (error) {
+        showAlert('Network error', 'error');
+      }
+    }
+
+    async function toggleSaveAction(btn, postId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ post_id: postId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          btn.classList.toggle('saved');
+          const textNode = [...btn.childNodes].find(n => n.nodeType === 3);
+          if (textNode) textNode.textContent = data.saved ? ' Saved' : ' Save';
+        }
+      } catch (error) {
+        showAlert('Network error', 'error');
+      }
+    }
+
+    async function loadComments(postId) {
+      const commentList = document.getElementById(`cl-${postId}`);
+      if (!commentList) return;
+      
+      commentList.innerHTML = '<div style="padding: 10px; text-align: center;">Loading comments...</div>';
+      
+      try {
+        const data = await apiCall(`${API_BASE_URL}/api/comments/${postId}`);
+        
+        if (data.success && data.comments.length > 0) {
+          commentList.innerHTML = data.comments.map(comment => {
+            // Get sentiment icon and style
+            let sentimentIcon = '';
+            let sentimentClass = '';
+            
+            switch(comment.sentiment) {
+              case 'positive':
+                sentimentIcon = '😊';
+                sentimentClass = 'sentiment-positive';
+                break;
+              case 'negative':
+                sentimentIcon = '😞';
+                sentimentClass = 'sentiment-negative';
+                break;
+              case 'mixed':
+                sentimentIcon = '🤔';
+                sentimentClass = 'sentiment-mixed';
+                break;
+              default:
+                sentimentIcon = '😐';
+                sentimentClass = 'sentiment-neutral';
+            }
+            
+            // Get confidence score if available
+            let confidenceHtml = '';
+            if (comment.sentiment_scores && comment.sentiment !== 'mixed') {
+              const score = comment.sentiment_scores[comment.sentiment];
+              confidenceHtml = `<span style="font-size: 0.6rem; opacity: 0.7;">(${score}%)</span>`;
+            }
+            
+            return `
+              <div class="comment-item">
+                <div class="c-avatar">${comment.author_avatar || (comment.author ? comment.author[0].toUpperCase() : 'U')}</div>
+                <div class="comment-bubble">
+                  <div class="comment-author">
+                    ${escapeHtml(comment.author)}
+                    <span class="sentiment-badge ${sentimentClass}">${sentimentIcon} ${comment.sentiment} ${confidenceHtml}</span>
+                  </div>
+                  <div class="comment-text">${escapeHtml(comment.text)}</div>
+                  <div class="comment-time">${formatDate(comment.created_at)}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          commentList.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--muted);">No comments yet. Be the first!</div>';
+        }
+      } catch (error) {
+        commentList.innerHTML = '<div style="padding: 10px; text-align: center;">Error loading comments</div>';
+      }
+    }
+
+    async function sendCommentAction(postId) {
+      const section = document.getElementById(`c-${postId}`);
+      const input = section.querySelector('.comment-input');
+      const text = input.value.trim();
+      
+      if (!text) return;
+      
+      const originalBtnText = section.querySelector('.comment-send').innerHTML;
+      section.querySelector('.comment-send').innerHTML = '...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/comments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ post_id: postId, text: text })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          input.value = '';
+          loadComments(postId);
+          showAlert('Comment added! Sentiment analyzed', 'success');
+        } else {
+          showAlert(data.message || 'Failed to add comment', 'error');
+        }
+      } catch (error) {
+        showAlert('Network error', 'error');
+      } finally {
+        section.querySelector('.comment-send').innerHTML = originalBtnText;
+      }
+    }
+
+    function toggleComments(sectionId) {
+      const section = document.getElementById(sectionId);
+      section.classList.toggle('open');
+      if (section.classList.contains('open')) {
+        const postId = sectionId.replace('c-', '');
+        loadComments(postId);
+        section.querySelector('.comment-input')?.focus();
+      }
+    }
+
+    function handleEnter(e, sectionId, postId) {
+      if (e.key === 'Enter') {
+        sendCommentAction(postId);
+      }
+    }
+
+    function setupDoubleTapLike() {
+      const tapState = {};
+      document.querySelectorAll('.post-image-wrap').forEach(wrap => {
+        const id = wrap.dataset.post;
+        if (!id) return;
+        tapState[id] = { count: 0, timer: null };
+        
+        wrap.addEventListener('click', function(e) {
+          const s = tapState[id];
+          s.count++;
+          
+          const ripple = document.createElement('div');
+          ripple.className = 'tap-ripple';
+          const rect = wrap.getBoundingClientRect();
+          ripple.style.left = (e.clientX - rect.left - 28) + 'px';
+          ripple.style.top = (e.clientY - rect.top - 28) + 'px';
+          wrap.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 450);
+          
+          clearTimeout(s.timer);
+          s.timer = setTimeout(() => {
+            if (s.count >= 2) {
+              const likeBtn = document.querySelector(`.like-btn[data-post-id="${id}"]`);
+              if (likeBtn && !likeBtn.classList.contains('liked')) {
+                toggleLikeAction(likeBtn, id);
+              }
+            }
+            s.count = 0;
+          }, 300);
+        });
+      });
+    }
+
+    function switchTab(btn, tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      loadFeed('following');
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+      this.classList.add('spinning');
+      loadFeed('following');
+      setTimeout(() => this.classList.remove('spinning'), 650);
+    });
+
+    loadFeed('following');
+  </script>
+</body>
+</html>

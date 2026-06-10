@@ -1,0 +1,69 @@
+﻿# Environment variables (CRITICAL - contains API keys, passwords, connection strings)
+.env
+.env.local
+.env.*.local
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Azure deployment files (contains credentials)
+*.publishsettings
+azuredeploy.json
+*.pubxml
+local.settings.json
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Secret and config files
+secrets.json
+config.local.js
+config.secret.js
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Test and coverage
+.coverage
+.pytest_cache/
+.tox/
+htmlcov/
+
+# Flask specific
+instance/
+.webassets-cache
+
+# Deployment archives
+*.zip
+*.tar.gz

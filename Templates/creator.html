@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pictor – Creator Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+        /* Light Theme (Default) */
+        :root {
+            --bg-gradient-start: #fdfbf7;
+            --bg-gradient-end: #f0ebe2;
+            --warm:    #f2ece1;
+            --ink:     #1a1614;
+            --muted:   #7a6f68;
+            --accent:  #e05c3a;
+            --creator: #e05c3a;
+            --consumer: #6b7fd4;
+            --border:  #e4ddd5;
+            --white:   #ffffff;
+            --error:   #d94040;
+            --success: #2a7a3b;
+            --r:       16px;
+            --shadow:  0 8px 32px rgba(0,0,0,.08);
+            --card-bg: rgba(255,255,255,0.9);
+            --input-bg: #faf7f2;
+            --transition: all 0.3s ease;
+            --blob-opacity: 0.2;
+        }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --bg-gradient-start: #0f0f1a;
+            --bg-gradient-end: #1a1a2e;
+            --warm:    #16213e;
+            --ink:     #eeeeee;
+            --muted:   #a0a0a0;
+            --accent:  #e05c3a;
+            --creator: #e05c3a;
+            --consumer: #6b7fd4;
+            --border:  #2a2a4a;
+            --white:   #0f0f1a;
+            --error:   #ff6b6b;
+            --success: #6bdf6b;
+            --shadow:  0 8px 32px rgba(0,0,0,.3);
+            --card-bg: rgba(22,33,62,0.95);
+            --input-bg: #1a1a2e;
+            --blob-opacity: 0.15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--ink);
+            min-height: 100vh;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(224,92,58,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(107,127,212,0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            z-index: 1000;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .theme-toggle:hover { transform: scale(1.05); }
+        .theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 2; }
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: var(--blob-opacity);
+            pointer-events: none;
+            z-index: 0;
+            transition: var(--transition);
+        }
+        .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -200px; right: -150px; }
+        .blob-2 { width: 450px; height: 450px; background: var(--consumer); bottom: -150px; left: -120px; }
+        .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: -100px; opacity: 0.1; }
+
+        .creator-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .logo {
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--ink);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .logo span { 
+            background: linear-gradient(135deg, var(--accent), var(--consumer));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #creatorNameDisplay {
+            font-weight: 500;
+            color: var(--ink);
+            background: var(--warm);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--accent), #c94e31);
+            color: var(--white);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .logout-btn:active {
+            transform: scale(.96);
+        }
+
+        .creator-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .upload-form {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .upload-form h3 {
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: var(--ink);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: .02em;
+            color: var(--muted);
+            font-family: 'Caveat', 'Amatic SC', cursive;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            background: var(--input-bg);
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 1rem;
+            color: var(--ink);
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(224,92,58,.12);
+            background: var(--card-bg);
+        }
+
+        /* Caption with AI button row */
+        .caption-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .caption-row textarea {
+            flex: 1;
+        }
+        .ai-caption-btn {
+            background: linear-gradient(135deg, var(--blue), #5a6bbf);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .ai-caption-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .ai-caption-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .preview-video {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, var(--accent), #c94e31);
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            box-shadow: 0 4px 16px rgba(224,92,58,.28);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow: 0 8px 24px rgba(224,92,58,.35);
+        }
+
+        .upload-btn:active {
+            transform: scale(.98);
+        }
+
+        .my-posts {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .my-posts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .my-posts h3 {
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 1.6rem;
+            color: var(--ink);
+        }
+
+        .refresh-btn {
+            background: var(--warm);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--muted);
+            transition: all .2s;
+        }
+
+        .refresh-btn:hover {
+            background: var(--border);
+            color: var(--ink);
+            transform: translateY(-1px);
+        }
+
+        .post-card {
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+            position: relative;
+        }
+
+        .post-card:last-child {
+            border-bottom: none;
+        }
+
+        .delete-post-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, var(--error), #b91c1c);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .delete-post-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .post-media {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .post-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+        }
+
+        .post-caption {
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .post-metadata {
+            color: var(--muted);
+            font-size: 0.85rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background: var(--warm);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--muted);
+            padding: 3rem;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            opacity: 0.25;
+            margin-bottom: 16px;
+        }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: rgba(42, 122, 59, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(42, 122, 59, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(217, 64, 64, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(217, 64, 64, 0.3);
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            background: var(--input-bg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+    </button>
+
+    <nav class="creator-nav">
+        <a href="#" onclick="window.location.reload(); return false;" class="logo">Pict<span>o</span>r</a>
+        <div class="nav-buttons">
+            <span id="creatorNameDisplay">Creator</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="creator-container">
+        <div id="alert" class="alert"></div>
+
+        <div class="upload-form">
+            <h3>Share new content</h3>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="title" placeholder="e.g., Sunset at the beach" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Caption</label>
+                    <div class="caption-row">
+                        <textarea id="caption" placeholder="Write a caption for your post... (or let AI generate it)" rows="3"></textarea>
+                        <button type="button" class="ai-caption-btn" id="aiCaptionBtn">✨ AI Caption</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="location" placeholder="e.g., New York, NY">
+                </div>
+                
+                <div class="form-group">
+                    <label>People tagged (comma-separated)</label>
+                    <input type="text" id="peopleTagged" placeholder="e.g., @sarah, @mike">
+                </div>
+                
+                <div class="form-group">
+                    <label>Hashtags (comma-separated)</label>
+                    <input type="text" id="hashtags" placeholder="e.g., #sunset, #travel">
+                </div>
+                
+                <div class="form-group">
+                    <label>Media (Image or Video) *</label>
+                    <input type="file" id="mediaFile" accept="image/*,video/*" required>
+                    <div class="preview-container" id="previewContainer"></div>
+                </div>
+                
+                <button type="submit" class="upload-btn">Publish</button>
+            </form>
+        </div>
+
+        <div class="my-posts">
+            <div class="my-posts-header">
+                <h3>Your uploads</h3>
+                <button class="refresh-btn" onclick="loadMyPosts()">Refresh</button>
+            </div>
+            <div id="myPostsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // AZURE BACKEND URL
+        // ============================================
+        const API_BASE_URL = window.location.origin;
+        
+        // ============================================
+        // DARK/LIGHT MODE FUNCTIONALITY
+        // ============================================
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        function updateThemeIcon() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const toggleBtn = document.getElementById('themeToggle');
+            if (toggleBtn) {
+                if (theme === 'dark') {
+                    toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>`;
+                } else {
+                    toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>`;
+                }
+            }
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+        }
+        
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        updateThemeIcon();
+        
+        // ============================================
+        // CREATOR FUNCTIONALITY WITH AZURE BLOB + AI
+        // ============================================
+        
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        let authToken = localStorage.getItem('jwt_token');
+
+        if (!authToken || !currentUser.user_id) {
+            window.location.href = 'login.html';
+        }
+
+        const displayName = currentUser.email ? currentUser.email.split('@')[0] : 'Creator';
+        document.getElementById('creatorNameDisplay').innerHTML = displayName;
+
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        async function loadMyPosts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/creator/posts`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const data = await response.json();
+                
+                const container = document.getElementById('myPostsContainer');
+                
+                if (!data.success || data.posts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="m21 15-5-5L5 21"/>
+                            </svg>
+                            <p>No uploads yet. Share your first photo or video!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = data.posts.map(post => `
+                    <div class="post-card">
+                        <button class="delete-post-btn" onclick="deletePost('${post.post_id}')">Delete</button>
+                        ${post.media_type === 'video' ? 
+                            `<video class="post-media" controls src="${post.image_url || '#'}"></video>` :
+                            `<img class="post-media" src="${post.image_url || '#'}" alt="${escapeHtml(post.title)}">`
+                        }
+                        <div class="post-title">${escapeHtml(post.title)}</div>
+                        <div class="post-caption">${escapeHtml(post.caption || '')}</div>
+                        <div class="post-metadata">
+                            <span>📍 ${escapeHtml(post.location || 'No location')}</span>
+                            <span>❤️ ${post.likes_count || 0} likes</span>
+                            <span>💬 ${post.comments_count || 0} comments</span>
+                            <span>📅 ${new Date(post.created_at).toLocaleDateString()}</span>
+                        </div>
+                        ${post.tags && post.tags.length > 0 ? `
+                            <div class="post-tags">
+                                ${post.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${post.people_tagged && post.people_tagged.length > 0 ? `
+                            <div class="post-tags">
+                                ${post.people_tagged.map(person => `<span class="tag">👤 ${escapeHtml(person)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                showAlert('Failed to load posts', 'error');
+            }
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('Are you sure you want to delete this post?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/creator/post/${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Post deleted successfully', 'success');
+                    loadMyPosts();
+                } else {
+                    showAlert(data.message || 'Failed to delete post', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                showAlert('Failed to delete post', 'error');
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================
+        // AI: GENERATE CAPTION FROM SELECTED IMAGE
+        // ============================================
+        async function generateAICaption() {
+            const mediaFile = document.getElementById('mediaFile').files[0];
+            const aiBtn = document.getElementById('aiCaptionBtn');
+            
+            if (!mediaFile) {
+                showAlert('Please select an image first', 'error');
+                return;
+            }
+            
+            if (!mediaFile.type.startsWith('image/')) {
+                showAlert('AI caption generation is only available for images', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const originalBtnText = aiBtn.textContent;
+            aiBtn.textContent = '🤖 Generating...';
+            aiBtn.disabled = true;
+            
+            try {
+                // Step 1: Get SAS upload URL to temporarily upload image
+                const fileExt = mediaFile.name.split('.').pop();
+                const sasResponse = await fetch(`${API_BASE_URL}/api/get-upload-url?ext=${fileExt}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const sasData = await sasResponse.json();
+                
+                if (!sasData.success) {
+                    throw new Error('Failed to get upload URL');
+                }
+                
+                // Step 2: Upload image to Azure Blob temporarily
+                const uploadResponse = await fetch(sasData.uploadUrl, {
+                    method: 'PUT',
+                    body: mediaFile,
+                    headers: { 'x-ms-blob-type': 'BlockBlob' }
+                });
+                
+                if (!uploadResponse.ok) {
+                    throw new Error('Failed to upload image for captioning');
+                }
+                
+                // Step 3: Request AI caption from backend
+                const captionResponse = await fetch(`${API_BASE_URL}/api/image/caption`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ image_url: sasData.blobUrl })
+                });
+                
+                const captionData = await captionResponse.json();
+                
+                if (captionData.success) {
+                    // Set the caption textarea value
+                    const captionTextarea = document.getElementById('caption');
+                    captionTextarea.value = captionData.caption;
+                    showAlert(`✨ AI Generated: "${captionData.caption}"`, 'success');
+                } else {
+                    showAlert('Could not generate caption for this image', 'error');
+                }
+                
+            } catch (error) {
+                console.error('AI Caption error:', error);
+                showAlert('Failed to generate AI caption. Please try again.', 'error');
+            } finally {
+                aiBtn.textContent = originalBtnText;
+                aiBtn.disabled = false;
+            }
+        }
+
+        // Preview media
+        document.getElementById('mediaFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewContainer = document.getElementById('previewContainer');
+            
+            if (!file) {
+                previewContainer.innerHTML = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                if (file.type.startsWith('image/')) {
+                    previewContainer.innerHTML = `<img class="preview-image" src="${event.target.result}" alt="Preview">`;
+                } else if (file.type.startsWith('video/')) {
+                    previewContainer.innerHTML = `<video class="preview-video" controls src="${event.target.result}"></video>`;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // AI Caption button event listener
+        document.getElementById('aiCaptionBtn').addEventListener('click', generateAICaption);
+
+        // Handle upload to backend
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            console.log("=== UPLOAD STARTED ===");
+            
+            const title = document.getElementById('title').value;
+            const caption = document.getElementById('caption').value;
+            const location = document.getElementById('location').value;
+            const peopleTaggedInput = document.getElementById('peopleTagged').value;
+            const hashtagsInput = document.getElementById('hashtags').value;
+            const mediaFile = document.getElementById('mediaFile').files[0];
+            
+            console.log("Title:", title);
+            console.log("Caption length:", caption.length);
+            console.log("File selected:", mediaFile ? mediaFile.name : "NO FILE");
+            
+            if (!title) {
+                showAlert('Please enter a title', 'error');
+                return;
+            }
+            
+            if (!mediaFile) {
+                showAlert('Please select a file to upload', 'error');
+                return;
+            }
+            
+            const peopleTagged = peopleTaggedInput ? peopleTaggedInput.split(',').map(t => t.trim()) : [];
+            const hashtags = hashtagsInput ? hashtagsInput.split(',').map(t => t.trim()) : [];
+            
+            const fileExt = mediaFile.name.split('.').pop();
+            const mediaType = mediaFile.type.startsWith('video/') ? 'video' : 'image';
+            
+            const submitBtn = document.querySelector('.upload-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Getting upload URL...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Step 1: Get SAS upload URL from backend
+                console.log("Step 1: Getting SAS URL...");
+                const sasResponse = await fetch(`${API_BASE_URL}/api/get-upload-url?ext=${fileExt}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const sasData = await sasResponse.json();
+                console.log("SAS Data:", sasData);
+                
+                if (!sasData.success) {
+                    throw new Error('Failed to get upload URL');
+                }
+                
+                // Step 2: Upload file directly to Azure Blob
+                console.log("Step 2: Uploading to Azure Blob...");
+                submitBtn.textContent = 'Uploading to cloud...';
+                const uploadResponse = await fetch(sasData.uploadUrl, {
+                    method: 'PUT',
+                    body: mediaFile,
+                    headers: { 'x-ms-blob-type': 'BlockBlob' }
+                });
+                
+                if (!uploadResponse.ok) {
+                    throw new Error('Failed to upload to Azure: ' + uploadResponse.status);
+                }
+                
+                // Step 3: Send metadata to backend with blob URL
+                console.log("Step 3: Sending metadata to backend...");
+                submitBtn.textContent = 'Publishing...';
+                const metadataResponse = await fetch(`${API_BASE_URL}/api/creator/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        caption: caption,
+                        location: location,
+                        people_tagged: peopleTagged,
+                        tags: hashtags,
+                        media_type: mediaType,
+                        media_url: sasData.blobUrl
+                    })
+                });
+                
+                const metadataData = await metadataResponse.json();
+                console.log("Metadata Response:", metadataData);
+                
+                if (metadataData.success) {
+                    let message = 'Published! Your content is now live.';
+                    if (metadataData.ai_caption_generated) {
+                        message = 'Published! AI generated a caption for your image.';
+                    }
+                    showAlert(message, 'success');
+                    document.getElementById('uploadForm').reset();
+                    document.getElementById('previewContainer').innerHTML = '';
+                    loadMyPosts();
+                } else {
+                    showAlert(metadataData.message || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showAlert('Upload failed: ' + error.message, 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('jwt_token');
+            window.location.href = 'login.html';
+        }
+
+        loadMyPosts();
+    </script>
+</body>
+</html>

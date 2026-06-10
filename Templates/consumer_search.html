@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pictor – Explore & Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* Light Theme (Default) */
+        :root {
+            --bg-gradient-start: #fdfbf7;
+            --bg-gradient-end: #f0ebe2;
+            --warm:    #f2ece1;
+            --ink:     #1a1614;
+            --muted:   #7a6f68;
+            --accent:  #e05c3a;
+            --heart:   #e8304a;
+            --blue:    #6b7fd4;
+            --border:  #e4ddd5;
+            --white:   #ffffff;
+            --error:   #d94040;
+            --success: #2a7a3b;
+            --r:       16px;
+            --shadow:  0 8px 32px rgba(0,0,0,.08);
+            --card-bg: rgba(255,255,255,0.9);
+            --input-bg: #faf7f2;
+            --transition: all 0.3s ease;
+            --blob-opacity: 0.2;
+        }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --bg-gradient-start: #0f0f1a;
+            --bg-gradient-end: #1a1a2e;
+            --warm:    #16213e;
+            --ink:     #eeeeee;
+            --muted:   #a0a0a0;
+            --accent:  #e05c3a;
+            --heart:   #ff6b6b;
+            --blue:    #6b7fd4;
+            --border:  #2a2a4a;
+            --white:   #0f0f1a;
+            --error:   #ff6b6b;
+            --success: #6bdf6b;
+            --shadow:  0 8px 32px rgba(0,0,0,.3);
+            --card-bg: rgba(22,33,62,0.95);
+            --input-bg: #1a1a2e;
+            --blob-opacity: 0.15;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--ink);
+            min-height: 100vh;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(224,92,58,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(107,127,212,0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            z-index: 1000;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .theme-toggle:hover { transform: scale(1.05); }
+        .theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 2; }
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: var(--blob-opacity);
+            pointer-events: none;
+            z-index: 0;
+            transition: var(--transition);
+        }
+        .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -200px; right: -150px; }
+        .blob-2 { width: 450px; height: 450px; background: var(--blue); bottom: -150px; left: -120px; }
+        .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: -100px; opacity: 0.1; }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            transition: var(--transition);
+        }
+
+        .nav-logo {
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--ink);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        .nav-logo span { 
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            border: 2px solid var(--border);
+            transition: var(--transition);
+        }
+
+        /* Search Bar - Hidden by default, shown only in Search tab */
+        .search-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px;
+            transition: var(--transition);
+            display: none;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 40px;
+            padding: 10px 18px;
+            transition: var(--transition);
+        }
+
+        .search-input-wrapper svg {
+            width: 20px;
+            height: 20px;
+            color: var(--muted);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: 1rem;
+            color: var(--ink);
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--muted);
+            opacity: 0.6;
+        }
+
+        /* Tabs */
+        .explore-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .explore-tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            transition: all 0.2s ease;
+        }
+        .explore-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 700;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px 90px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Creator Card */
+        .creator-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            margin-bottom: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .creator-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .creator-avatar-lg {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .creator-info {
+            flex: 1;
+        }
+
+        .creator-username {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--ink);
+        }
+
+        .creator-fullname {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .creator-stats {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .follow-small-btn {
+            background: linear-gradient(135deg, var(--blue), #5a6bbf);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+        }
+        .follow-small-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+        .follow-small-btn.following {
+            background: var(--warm);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        /* Post Card */
+        .post-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            transition: var(--transition);
+            animation: fadeUp 0.5s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .9rem;
+            color: var(--white);
+        }
+
+        .post-meta { flex: 1; }
+        .post-username {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--ink);
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .post-username:hover { color: var(--accent); }
+        .post-location {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .post-image-wrap {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: var(--warm);
+            overflow: hidden;
+        }
+        .post-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .act-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: .9rem;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all 0.2s ease;
+        }
+        .act-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .act-btn:hover { background: var(--warm); color: var(--ink); transform: translateY(-1px); }
+
+        .act-btn.liked {
+            border-color: var(--heart);
+            color: var(--heart);
+            background: rgba(232,48,74,0.1);
+        }
+        .act-btn.liked svg { fill: var(--heart); stroke: none; }
+
+        .act-btn.saved {
+            border-color: var(--blue);
+            color: var(--blue);
+            background: rgba(107,127,212,0.1);
+        }
+        .act-btn.saved svg { fill: var(--blue); stroke: none; }
+
+        .save-btn { margin-left: auto; }
+
+        .post-body {
+            padding: 8px 16px 16px;
+        }
+        .post-caption {
+            font-size: .95rem;
+            line-height: 1.5;
+            color: var(--ink);
+        }
+        .post-caption strong { font-weight: 700; margin-right: 4px; }
+        .post-tags { margin-top: 8px; font-size: .85rem; color: var(--blue); }
+        .post-time { margin-top: 6px; font-size: .75rem; color: var(--muted); }
+
+        .toggle-comments-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: .8rem;
+            color: var(--muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            transition: var(--transition);
+        }
+        .toggle-comments-link:hover { color: var(--ink); }
+
+        .comments-section {
+            border-top: 1px solid var(--border);
+            padding: 12px 16px;
+            display: none;
+        }
+        .comments-section.open { display: block; }
+
+        .comment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .c-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+        .comment-bubble {
+            flex: 1;
+            background: var(--warm);
+            border-radius: 12px;
+            padding: 8px 12px;
+        }
+        .comment-author { font-weight: 700; font-size: .8rem; color: var(--ink); }
+        .comment-text   { font-size: .85rem; margin-top: 2px; line-height: 1.4; }
+        .comment-time   { font-size: .7rem; color: var(--muted); margin-top: 4px; }
+
+        .comment-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .c-avatar-me {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+        .comment-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 40px;
+            background: var(--input-bg);
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            font-size: .9rem;
+            color: var(--ink);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .comment-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(107,127,212,.15);
+        }
+
+        .comment-send {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .comment-send:hover { transform: scale(1.05); }
+        .comment-send svg { width: 16px; height: 16px; }
+
+        /* Creator Profile */
+        .creator-profile {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin: 0 auto 16px;
+        }
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin: 20px 0;
+        }
+        .profile-stat {
+            text-align: center;
+        }
+        .profile-stat-number {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+        .profile-stat-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            transition: var(--transition);
+        }
+        .back-btn:hover { color: var(--ink); transform: translateX(-3px); }
+
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            color: var(--muted);
+        }
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            opacity: .25;
+            margin-bottom: 16px;
+        }
+        .empty-state h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 65px;
+            z-index: 100;
+            transition: var(--transition);
+        }
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: .7rem;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .nav-tab svg { width: 22px; height: 22px; }
+        .nav-tab.active { color: var(--accent); }
+        .nav-tab:hover { background: var(--warm); transform: translateY(-2px); }
+
+        .alert {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            padding: 12px 24px;
+            border-radius: 40px;
+            display: none;
+            font-size: .9rem;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            font-family: 'Caveat', 'Amatic SC', cursive;
+            backdrop-filter: blur(10px);
+        }
+        .alert-success {
+            background: rgba(42, 122, 59, 0.9);
+            color: white;
+        }
+        .alert-error {
+            background: rgba(217, 64, 64, 0.9);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div id="alert" class="alert"></div>
+
+    <nav class="top-nav">
+        <a class="nav-logo" href="#" onclick="window.location.reload(); return false;">Pict<span>o</span>r</a>
+        <a class="nav-avatar" href="#" id="avatarDisplay">YO</a>
+    </nav>
+
+    <!-- Search Bar - Hidden initially, shown only on Search Results tab -->
+    <div class="search-section" id="searchSection">
+        <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search for creators..." autocomplete="off">
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="explore-tabs">
+        <button class="explore-tab active" id="tabExplore" onclick="switchExploreTab('explore')">Explore</button>
+        <button class="explore-tab" id="tabSearch" onclick="switchExploreTab('search')">Search Results</button>
+    </div>
+
+    <main id="mainContent">
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <h3>Explore</h3>
+            <p>Discover new creators and content</p>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a class="nav-tab" href="consumer.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Home
+        </a>
+        <a class="nav-tab active" href="consumer_search.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Explore
+        </a>
+        <a class="nav-tab" href="consumer_profile.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profile
+        </a>
+    </nav>
+
+    <script>
+        // Azure Backend URL
+        const API_BASE_URL = window.location.origin;
+        
+        // ============================================
+        // DARK/LIGHT MODE
+        // ============================================
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        function updateThemeIcon() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const toggleBtn = document.getElementById('themeToggle');
+            if (toggleBtn) {
+                if (theme === 'dark') {
+                    toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>`;
+                } else {
+                    toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>`;
+                }
+            }
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+        }
+        
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        updateThemeIcon();
+
+        // ============================================
+        // SEARCH & COMMENT FUNCTIONALITY
+        // ============================================
+        let authToken = localStorage.getItem('jwt_token');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        let currentTab = 'explore';
+        let currentSearchQuery = '';
+        let viewingProfile = null;
+
+        if (!authToken || !currentUser.user_id) {
+            window.location.href = 'login.html';
+        }
+
+        const avatarLetter = currentUser.email ? currentUser.email[0].toUpperCase() : 'YO';
+        document.getElementById('avatarDisplay').innerHTML = avatarLetter;
+
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            setTimeout(() => alertDiv.style.display = 'none', 3000);
+        }
+
+        async function apiCall(url, options = {}) {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    ...options.headers
+                }
+            });
+            return response.json();
+        }
+
+        async function toggleFollow(creatorId, btnElement) {
+            const isFollowing = btnElement.classList.contains('following');
+            const endpoint = isFollowing ? '/api/unfollow' : '/api/follow';
+            
+            try {
+                const data = await apiCall(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    body: JSON.stringify({ creator_id: creatorId })
+                });
+                
+                if (data.success) {
+                    if (data.following) {
+                        btnElement.classList.add('following');
+                        btnElement.textContent = 'Following';
+                        showAlert('Followed creator!', 'success');
+                    } else {
+                        btnElement.classList.remove('following');
+                        btnElement.textContent = 'Follow';
+                        showAlert('Unfollowed creator', 'success');
+                    }
+                    
+                    if (viewingProfile) {
+                        loadCreatorProfile(viewingProfile);
+                    }
+                    if (currentTab === 'search' && currentSearchQuery) {
+                        searchCreators(currentSearchQuery);
+                    }
+                }
+            } catch (error) {
+                showAlert('Network error', 'error');
+            }
+        }
+
+        async function toggleLikeAction(btn, postId) {
+            try {
+                const data = await apiCall(`${API_BASE_URL}/api/like`, {
+                    method: 'POST',
+                    body: JSON.stringify({ post_id: postId })
+                });
+                
+                if (data.success) {
+                    btn.classList.toggle('liked');
+                    const textNode = [...btn.childNodes].find(n => n.nodeType === 3);
+                    if (textNode) textNode.textContent = data.liked ? ' Liked' : ' Like';
+                }
+            } catch (error) {
+                showAlert('Network error', 'error');
+            }
+        }
+
+        async function toggleSaveAction(btn, postId) {
+            try {
+                const data = await apiCall(`${API_BASE_URL}/api/save`, {
+                    method: 'POST',
+                    body: JSON.stringify({ post_id: postId })
+                });
+                
+                if (data.success) {
+                    btn.classList.toggle('saved');
+                    const textNode = [...btn.childNodes].find(n => n.nodeType === 3);
+                    if (textNode) textNode.textContent = data.saved ? ' Saved' : ' Save';
+                }
+            } catch (error) {
+                showAlert('Network error', 'error');
+            }
+        }
+
+        // COMMENT FUNCTIONS
+        async function loadComments(postId) {
+            const commentList = document.getElementById(`cl-${postId}`);
+            if (!commentList) return;
+            
+            commentList.innerHTML = '<div style="padding: 10px; text-align: center;">Loading comments...</div>';
+            
+            try {
+                const data = await apiCall(`${API_BASE_URL}/api/comments/${postId}`);
+                
+                if (data.success && data.comments && data.comments.length > 0) {
+                    commentList.innerHTML = data.comments.map(comment => `
+                        <div class="comment-item">
+                            <div class="c-avatar">${comment.author_avatar || (comment.author ? comment.author[0].toUpperCase() : 'U')}</div>
+                            <div class="comment-bubble">
+                                <div class="comment-author">${escapeHtml(comment.author)}</div>
+                                <div class="comment-text">${escapeHtml(comment.text)}</div>
+                                <div class="comment-time">${formatDate(comment.created_at)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    commentList.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--muted);">No comments yet. Be the first!</div>';
+                }
+            } catch (error) {
+                commentList.innerHTML = '<div style="padding: 10px; text-align: center;">Error loading comments</div>';
+            }
+        }
+
+        async function sendCommentAction(postId) {
+            const section = document.getElementById(`c-${postId}`);
+            const input = section.querySelector('.comment-input');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ post_id: postId, text: text })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    input.value = '';
+                    loadComments(postId);
+                    showAlert('Comment added!', 'success');
+                } else {
+                    showAlert(data.message || 'Failed to add comment', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error', 'error');
+            }
+        }
+
+        function toggleComments(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.classList.toggle('open');
+            if (section.classList.contains('open')) {
+                const postId = sectionId.replace('c-', '');
+                loadComments(postId);
+                section.querySelector('.comment-input')?.focus();
+            }
+        }
+
+        function handleEnter(e, sectionId, postId) {
+            if (e.key === 'Enter') {
+                sendCommentAction(postId);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Just now';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000 / 60 / 60 / 24);
+            if (diff === 0) return 'Today';
+            if (diff === 1) return 'Yesterday';
+            if (diff < 7) return `${diff} days ago`;
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderPosts(posts, containerId) {
+            const container = document.getElementById(containerId);
+            if (!posts || posts.length === 0) {
+                container.innerHTML = `<div class="empty-state"><h3>No posts yet</h3><p>Check back later!</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = posts.map(post => `
+                <article class="post-card">
+                    <div class="post-header">
+                        <div class="avatar">${post.creator_avatar || (post.creator_name ? post.creator_name[0].toUpperCase() : 'CR')}</div>
+                        <div class="post-meta">
+                            <span class="post-username" onclick="loadCreatorProfile('${post.creator_id}')">${escapeHtml(post.creator_name)}</span>
+                            <div class="post-location">${escapeHtml(post.location || 'No location')}</div>
+                        </div>
+                    </div>
+                    <div class="post-image-wrap">
+                        ${post.image_url ? `<img src="${post.image_url}" alt="${escapeHtml(post.title)}">` : '<div class="image-placeholder">Image loading...</div>'}
+                    </div>
+                    <div class="post-actions">
+                        <button class="act-btn like-btn ${post.liked_by_user ? 'liked' : ''}" onclick="toggleLikeAction(this, '${post.post_id}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            Like
+                        </button>
+                        <button class="act-btn" onclick="toggleComments('c-${post.post_id}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Comment
+                        </button>
+                        <button class="act-btn save-btn ${post.saved_by_user ? 'saved' : ''}" onclick="toggleSaveAction(this, '${post.post_id}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                            Save
+                        </button>
+                    </div>
+                    <div class="post-body">
+                        <p class="post-caption"><strong>${escapeHtml(post.creator_name)}</strong> ${escapeHtml(post.caption || '')}</p>
+                        ${post.tags && post.tags.length > 0 ? `<p class="post-tags">${post.tags.map(t => escapeHtml(t)).join(' ')}</p>` : ''}
+                        <p class="post-time">${formatDate(post.created_at)}</p>
+                        <button class="toggle-comments-link" onclick="toggleComments('c-${post.post_id}')">View comments (${post.comments_count || 0})</button>
+                    </div>
+
+                    <div class="comments-section" id="c-${post.post_id}">
+                        <div class="comment-list" id="cl-${post.post_id}"></div>
+                        <div class="comment-input-row">
+                            <div class="c-avatar-me">${avatarLetter}</div>
+                            <input class="comment-input" type="text" placeholder="Write a comment…" onkeydown="handleEnter(event, 'c-${post.post_id}', '${post.post_id}')" />
+                            <button class="comment-send" onclick="sendCommentAction('${post.post_id}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        async function loadExplore() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="empty-state"><h3>Loading explore...</h3></div>';
+            viewingProfile = null;
+            
+            // Hide search bar when on Explore tab
+            const searchSection = document.getElementById('searchSection');
+            if (searchSection) searchSection.style.display = 'none';
+            
+            try {
+                const data = await apiCall(`${API_BASE_URL}/api/explore/posts`);
+                if (data.success) {
+                    renderPosts(data.posts, 'mainContent');
+                } else {
+                    mainContent.innerHTML = '<div class="empty-state"><h3>Error loading explore</h3></div>';
+                }
+            } catch (error) {
+                mainContent.innerHTML = '<div class="empty-state"><h3>Error loading explore</h3><p>Make sure Flask is running</p></div>';
+            }
+        }
+
+        async function searchCreators(query) {
+            if (!query.trim()) {
+                document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Enter a search term</h3><p>Search for creators by name or username</p></div>';
+                return;
+            }
+            
+            document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Searching...</h3></div>';
+            
+            try {
+                const data = await apiCall(`${API_BASE_URL}/api/search/creators?q=${encodeURIComponent(query)}`);
+                
+                if (data.success && data.results.length > 0) {
+                    document.getElementById('mainContent').innerHTML = data.results.map(creator => `
+                        <div class="creator-card" onclick="loadCreatorProfile('${creator.user_id}')">
+                            <div class="creator-avatar-lg">${creator.avatar}</div>
+                            <div class="creator-info">
+                                <div class="creator-username">${escapeHtml(creator.username)}</div>
+                                <div class="creator-fullname">${escapeHtml(creator.fullname)}</div>
+                                <div class="creator-stats">📷 ${creator.posts_count} posts</div>
+                            </div>
+                            <button class="follow-small-btn ${creator.is_following ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${creator.user_id}', this)">
+                                ${creator.is_following ? 'Following' : 'Follow'}
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>No creators found</h3><p>Try a different search term</p></div>';
+                }
+            } catch (error) {
+                document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Error searching</h3></div>';
+            }
+        }
+
+        async function loadCreatorProfile(creatorId) {
+            viewingProfile = creatorId;
+            document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Loading profile...</h3></div>';
+            
+            try {
+                const data = await apiCall(`${API_BASE_URL}/api/creator/profile/${creatorId}`);
+                
+                if (data.success) {
+                    const creator = data.creator;
+                    document.getElementById('mainContent').innerHTML = `
+                        <button class="back-btn" onclick="backToPrevious()">← Back to ${currentTab === 'search' ? 'Search' : 'Explore'}</button>
+                        <div class="creator-profile">
+                            <div class="profile-avatar">${creator.avatar}</div>
+                            <h2>${escapeHtml(creator.username)}</h2>
+                            <p style="color: var(--muted); margin-top: 4px;">${escapeHtml(creator.fullname)}</p>
+                            <div class="profile-stats">
+                                <div class="profile-stat"><div class="profile-stat-number">${creator.posts_count}</div><div class="profile-stat-label">Posts</div></div>
+                                <div class="profile-stat"><div class="profile-stat-number">${creator.followers_count}</div><div class="profile-stat-label">Followers</div></div>
+                            </div>
+                            <button class="follow-small-btn ${creator.is_following ? 'following' : ''}" onclick="toggleFollow('${creator.user_id}', this)">
+                                ${creator.is_following ? 'Following' : 'Follow'}
+                            </button>
+                        </div>
+                        <div id="profilePosts"></div>
+                    `;
+                    renderPosts(data.posts, 'profilePosts');
+                } else {
+                    document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Creator not found</h3></div>';
+                }
+            } catch (error) {
+                document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Error loading profile</h3></div>';
+            }
+        }
+
+        function backToPrevious() {
+            viewingProfile = null;
+            if (currentTab === 'explore') {
+                loadExplore();
+            } else {
+                searchCreators(currentSearchQuery);
+            }
+        }
+
+        function switchExploreTab(tab) {
+            currentTab = tab;
+            const searchSection = document.getElementById('searchSection');
+            const searchInput = document.getElementById('searchInput');
+            
+            // Update tab active states
+            document.getElementById('tabExplore').classList.toggle('active', tab === 'explore');
+            document.getElementById('tabSearch').classList.toggle('active', tab === 'search');
+            
+            if (tab === 'explore') {
+                // Hide search bar
+                if (searchSection) searchSection.style.display = 'none';
+                // Clear search input
+                if (searchInput) searchInput.value = '';
+                currentSearchQuery = '';
+                // Load explore posts
+                loadExplore();
+            } else {
+                // Show search bar
+                if (searchSection) searchSection.style.display = 'block';
+                // Focus on search input
+                if (searchInput) setTimeout(() => searchInput.focus(), 100);
+                // Search if there's a query
+                if (currentSearchQuery) {
+                    searchCreators(currentSearchQuery);
+                } else {
+                    document.getElementById('mainContent').innerHTML = '<div class="empty-state"><h3>Enter a search term</h3><p>Search for creators by name or username</p></div>';
+                }
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        let debounceTimer;
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                currentSearchQuery = this.value;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (currentTab === 'search') {
+                        searchCreators(currentSearchQuery);
+                    }
+                }, 500);
+            });
+        }
+
+        // Initial load - hide search bar, show explore
+        loadExplore();
+    </script>
+</body>
+</html>

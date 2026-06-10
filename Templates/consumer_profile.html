@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pictor – Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Light Theme (Default) */
+    :root {
+      --bg-gradient-start: #fdfbf7;
+      --bg-gradient-end: #f0ebe2;
+      --warm:    #f2ece1;
+      --ink:     #1a1614;
+      --muted:   #7a6f68;
+      --accent:  #e05c3a;
+      --heart:   #e8304a;
+      --blue:    #6b7fd4;
+      --border:  #e4ddd5;
+      --white:   #ffffff;
+      --error:   #d94040;
+      --success: #2a7a3b;
+      --r:       16px;
+      --shadow:  0 8px 32px rgba(0,0,0,.08);
+      --card-bg: rgba(255,255,255,0.9);
+      --input-bg: #faf7f2;
+      --transition: all 0.3s ease;
+      --blob-opacity: 0.2;
+    }
+
+    [data-theme="dark"] {
+      --bg-gradient-start: #0f0f1a;
+      --bg-gradient-end: #1a1a2e;
+      --warm:    #16213e;
+      --ink:     #eeeeee;
+      --muted:   #a0a0a0;
+      --accent:  #e05c3a;
+      --heart:   #ff6b6b;
+      --blue:    #6b7fd4;
+      --border:  #2a2a4a;
+      --white:   #0f0f1a;
+      --error:   #ff6b6b;
+      --success: #6bdf6b;
+      --shadow:  0 8px 32px rgba(0,0,0,.3);
+      --card-bg: rgba(22,33,62,0.95);
+      --input-bg: #1a1a2e;
+      --blob-opacity: 0.15;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      color: var(--ink);
+      min-height: 100vh;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(224,92,58,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(107,127,212,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 80px;
+      z-index: 1000;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { transform: scale(1.05); }
+    .theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 2; }
+
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: var(--blob-opacity);
+      pointer-events: none;
+      z-index: 0;
+      transition: var(--transition);
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -200px; right: -150px; }
+    .blob-2 { width: 450px; height: 450px; background: var(--blue); bottom: -150px; left: -120px; }
+    .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: -100px; opacity: 0.1; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      transition: var(--transition);
+    }
+
+    .nav-logo {
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .nav-logo span { 
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      border: 2px solid var(--border);
+    }
+
+    .profile-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+    }
+
+    .profile-tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      transition: all 0.2s ease;
+    }
+    .profile-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px 90px;
+      position: relative;
+      z-index: 10;
+    }
+
+    
+    .profile-header {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 0 auto 16px;
+      border: 3px solid var(--border);
+    }
+
+    .profile-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .profile-username {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .profile-email {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    
+    .post-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--white);
+    }
+
+    .post-meta { flex: 1; }
+    .post-username {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .post-location {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .post-image-wrap {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: var(--warm);
+      overflow: hidden;
+    }
+    .post-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .act-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 40px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: .85rem;
+      color: var(--muted);
+      transition: all 0.2s ease;
+    }
+    .act-btn svg { width: 16px; height: 16px; }
+    .act-btn.liked {
+      border-color: var(--heart);
+      color: var(--heart);
+      background: rgba(232,48,74,0.1);
+    }
+    .act-btn.saved {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(107,127,212,0.1);
+    }
+
+    .post-body {
+      padding: 8px 16px 16px;
+    }
+    .post-caption {
+      font-size: .9rem;
+      line-height: 1.4;
+      color: var(--ink);
+    }
+    .post-caption strong { font-weight: 700; margin-right: 4px; }
+    .post-tags { margin-top: 6px; font-size: .8rem; color: var(--blue); }
+    .post-time { margin-top: 6px; font-size: .7rem; color: var(--muted); }
+
+    .creator-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: var(--transition);
+    }
+
+    .creator-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .creator-info {
+      flex: 1;
+    }
+    .creator-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--ink);
+    }
+    .creator-email {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--muted);
+    }
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      opacity: .25;
+      margin-bottom: 14px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 65px;
+      z-index: 100;
+    }
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 500;
+      padding: 8px 20px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    .nav-tab svg { width: 22px; height: 22px; }
+    .nav-tab.active { color: var(--accent); }
+    .nav-tab:hover { background: var(--warm); transform: translateY(-2px); }
+
+    .logout-btn {
+      background: linear-gradient(135deg, var(--error), #b91c1c);
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-family: 'Caveat', 'Amatic SC', cursive;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 20px;
+      transition: all 0.2s ease;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <button class="theme-toggle" id="themeToggle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </button>
+
+  <nav class="top-nav">
+    <a class="nav-logo" href="#" onclick="window.location.reload(); return false;">Pict<span>o</span>r</a>
+    <a class="nav-avatar" href="#" id="avatarDisplay">YO</a>
+  </nav>
+
+  <div class="profile-tabs">
+    <button class="profile-tab active" id="tabSaved" onclick="switchProfileTab('saved')">Saved</button>
+    <button class="profile-tab" id="tabLiked" onclick="switchProfileTab('liked')">Liked</button>
+    <button class="profile-tab" id="tabFollowing" onclick="switchProfileTab('following')">Following</button>
+  </div>
+
+  <main id="mainContent">
+    <div class="empty-state"><h3>Loading profile...</h3></div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a class="nav-tab" href="consumer.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a class="nav-tab" href="consumer_search.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </a>
+    <a class="nav-tab active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+
+  <script>
+    // ============================================
+    // DARK/LIGHT MODE
+    // ============================================
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    function updateThemeIcon() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const toggleBtn = document.getElementById('themeToggle');
+      if (toggleBtn) {
+        if (theme === 'dark') {
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+        } else {
+          toggleBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+        }
+      }
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon();
+    }
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    updateThemeIcon();
+    
+    // ============================================
+    // PROFILE FUNCTIONALITY
+    // ============================================
+    
+  
+    const API_BASE_URL = window.location.origin;
+    
+    let authToken = localStorage.getItem('jwt_token');
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    if (!authToken || !currentUser.user_id) {
+      window.location.href = 'login.html';
+    }
+
+    const avatarLetter = currentUser.email ? currentUser.email[0].toUpperCase() : 'YO';
+    document.getElementById('avatarDisplay').innerHTML = avatarLetter;
+
+    let savedPosts = [];
+    let likedPosts = [];
+    let followingList = [];
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Just now';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000 / 60 / 60 / 24);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff < 7) return `${diff} days ago`;
+      return date.toLocaleDateString();
+    }
+
+    async function loadProfileData() {
+      try {
+        // Load saved posts
+        const savedResponse = await fetch(`${API_BASE_URL}/api/user/saved`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const savedData = await savedResponse.json();
+        if (savedData.success) savedPosts = savedData.posts;
+        
+        // Load liked posts
+        const likedResponse = await fetch(`${API_BASE_URL}/api/user/liked`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const likedData = await likedResponse.json();
+        if (likedData.success) likedPosts = likedData.posts;
+        
+        // Load following list
+        const followingResponse = await fetch(`${API_BASE_URL}/api/user/follows`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const followingData = await followingResponse.json();
+        if (followingData.success) followingList = followingData.follows;
+        
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+      }
+    }
+
+    function renderProfileHeader() {
+      return `
+        <div class="profile-header">
+          <div class="profile-avatar">${avatarLetter}</div>
+          <div class="profile-name">${escapeHtml(currentUser.fullname || currentUser.email?.split('@')[0] || 'User')}</div>
+          <div class="profile-username">${escapeHtml(currentUser.username || '@user')}</div>
+          <div class="profile-email">${escapeHtml(currentUser.email || '')}</div>
+          <div class="profile-stats">
+            <div class="stat"><div class="stat-number">${savedPosts.length}</div><div class="stat-label">Saved</div></div>
+            <div class="stat"><div class="stat-number">${likedPosts.length}</div><div class="stat-label">Liked</div></div>
+            <div class="stat"><div class="stat-number">${followingList.length}</div><div class="stat-label">Following</div></div>
+          </div>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      `;
+    }
+
+    function renderPosts(posts, type) {
+      if (!posts || posts.length === 0) {
+        return `<div class="empty-state"><h3>No ${type} posts yet</h3><p>Posts you ${type} will appear here!</p></div>`;
+      }
+      
+      return posts.map(post => `
+        <article class="post-card">
+          <div class="post-header">
+            <div class="avatar">${post.creator_avatar || (post.creator_name ? post.creator_name[0].toUpperCase() : 'CR')}</div>
+            <div class="post-meta">
+              <a class="post-username" href="#">${escapeHtml(post.creator_name)}</a>
+              <div class="post-location">${escapeHtml(post.location || 'No location')}</div>
+            </div>
+          </div>
+          <div class="post-image-wrap">
+            ${post.image_url ? `<img src="${post.image_url}" alt="${escapeHtml(post.title)}">` : '<div style="padding:40px;text-align:center">No image</div>'}
+          </div>
+          <div class="post-actions">
+            <button class="act-btn ${type === 'liked' ? 'liked' : ''}" disabled style="opacity:0.7">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              ${post.likes_count || 0}
+            </button>
+            <button class="act-btn ${type === 'saved' ? 'saved' : ''}" disabled style="opacity:0.7">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              ${post.saves_count || 0}
+            </button>
+          </div>
+          <div class="post-body">
+            <p class="post-caption"><strong>${escapeHtml(post.creator_name)}</strong> ${escapeHtml(post.caption || '')}</p>
+            ${post.tags && post.tags.length > 0 ? `<p class="post-tags">${post.tags.map(t => escapeHtml(t)).join(' ')}</p>` : ''}
+            <p class="post-time">${formatDate(post.created_at)}</p>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderFollowingList() {
+      if (!followingList || followingList.length === 0) {
+        return `<div class="empty-state"><h3>No followed creators</h3><p>Follow creators to see them here!</p></div>`;
+      }
+      
+      return followingList.map(creator => `
+        <div class="creator-card">
+          <div class="creator-avatar">${creator.creator_name ? creator.creator_name[0].toUpperCase() : 'CR'}</div>
+          <div class="creator-info">
+            <div class="creator-name">${escapeHtml(creator.creator_name)}</div>
+            <div class="creator-email">${escapeHtml(creator.creator_email)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function switchProfileTab(tab) {
+      document.getElementById('tabSaved').classList.toggle('active', tab === 'saved');
+      document.getElementById('tabLiked').classList.toggle('active', tab === 'liked');
+      document.getElementById('tabFollowing').classList.toggle('active', tab === 'following');
+      
+      const mainContent = document.getElementById('mainContent');
+      
+      if (tab === 'saved') {
+        mainContent.innerHTML = renderProfileHeader() + renderPosts(savedPosts, 'saved');
+      } else if (tab === 'liked') {
+        mainContent.innerHTML = renderProfileHeader() + renderPosts(likedPosts, 'liked');
+      } else {
+        mainContent.innerHTML = renderProfileHeader() + renderFollowingList();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    }
+
+    async function init() {
+      await loadProfileData();
+      switchProfileTab('saved');
+    }
+    
+    init();
+  </script>
+</body>
+</html>
