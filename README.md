@@ -1,226 +1,171 @@
-📸 Pictor - Social Media Platform with Azure AI
-Pictor is a full-stack social media platform that connects creators with consumers, powered by Azure cloud services and AI capabilities.
+# 📸 Pictor – Social Media Platform on Microsoft Azure
 
-🚀 Live Demo
-The application is deployed on Azure App Service: https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net
+Pictor is a full-stack social media platform that connects **creators** with **consumers**. It was built with Flask and **deployed and hosted on Microsoft Azure**, using Azure cloud services for hosting, data storage and AI features.
 
-⚠️ Note: The Azure deployment is temporary for demonstration purposes.
+> Developed as MSc coursework at Ulster University.
 
-✨ Features
-For Consumers
-Browse content feed (For You / Following)
+---
 
-Like and save posts
+## ☁️ Hosted on Microsoft Azure
 
-Follow creators
+The whole application ran in the cloud on Azure. Every part of the system used an Azure service:
 
-Comment with AI sentiment analysis
+| Layer | Azure service | What it did |
+|-------|---------------|-------------|
+| Web hosting | **Azure App Service** (France Central) | Hosted the Flask app (frontend templates + REST API) |
+| Database | **Azure Cosmos DB** (NoSQL API) | Stored users, posts, likes, comments, follows |
+| Media storage | **Azure Blob Storage** | Stored uploaded images, served with SAS URLs |
+| Image captioning | **Azure AI Vision** (Computer Vision) | Generated captions for uploaded images |
+| Sentiment analysis | **Azure AI Language** | Classified comments as positive or negative |
+| Translation | **Azure AI Translator** | Translated comments into the user's language |
+| Configuration | **App Service Application Settings** | Held all keys and connection strings (no secrets in code) |
 
-Search for creators
+**Live deployment URL:** https://pictor-app-byaadwf8awd0ach8.francecentral-01.azurewebsites.net
 
-Dark/Light theme toggle
+> ⚠️ The Azure deployment was temporary for assessment and demonstration, so the link may now be offline. A full recorded walkthrough of the hosted app is included in this repo: **`Poudel-E1 Scalable.mp4`**.
 
-For Creators
-Upload images with AI-generated captions
+### Architecture
 
-Auto-generate hashtags
+```
+ Browser
+    │  HTTPS
+    ▼
+ Azure App Service  ──  Flask (app.py) + HTML templates
+    │
+    ├── Azure Cosmos DB ........ users, posts, comments, likes, follows
+    ├── Azure Blob Storage ..... uploaded images
+    ├── Azure AI Vision ........ auto image captions
+    ├── Azure AI Language ...... comment sentiment
+    └── Azure AI Translator .... comment translation
+```
 
-Manage posts (edit/delete)
+---
 
-View engagement statistics
+## ✨ Features
 
-Track likes, comments, and saves
+**Consumers**
+- Content feed (For You / Following)
+- Like, save and comment on posts
+- Follow and search creators
+- Dark / light theme
 
-AI-Powered Features
-🤖 Auto Image Captioning - Azure Computer Vision generates captions for uploaded images
+**Creators**
+- Upload images with AI-generated captions and hashtags
+- Edit and delete posts
+- View engagement stats (likes, comments, saves)
 
-📊 Sentiment Analysis - Comments are analyzed for positive/negative sentiment
+**AI (Azure)**
+- 🤖 Auto image captioning – Azure AI Vision
+- 📊 Comment sentiment analysis – Azure AI Language
+- 🌐 Comment translation – Azure AI Translator
 
-🌐 Language Translation - Translate comments to your preferred language
+**Security**
+- 🔐 JWT authentication with 24-hour expiry
+- 🔒 Role-based access (consumer / creator)
+- 🧂 SHA-256 password hashing
+- 🗝️ All secrets kept in environment variables / Azure App Settings
 
-Security Features
-🔐 JWT Authentication - Secure token-based authentication
+---
 
-⏰ Token Expiry - Tokens expire after 24 hours for security
+## 🛠️ Tech Stack
 
-🔒 Role-Based Access - Separate endpoints for consumers and creators
+| Component | Technology |
+|-----------|------------|
+| Backend | Python, Flask |
+| Frontend | HTML, CSS, JavaScript (Flask templates) |
+| Database | Azure Cosmos DB |
+| Storage | Azure Blob Storage |
+| AI | Azure AI Vision, Language, Translator |
+| Auth | JWT (PyJWT) |
+| Hosting | Azure App Service |
 
-🧂 Password Hashing - Passwords hashed using SHA-256
+---
 
-🛠️ Tech Stack
-Component	Technology
-Backend	Flask (Python)
-Database	Azure Cosmos DB
-Storage	Azure Blob Storage
-Authentication	JWT (JSON Web Tokens)
-AI Services	Azure Cognitive Services
-Deployment	Azure App Service
-📋 Prerequisites
-Before running this project, you need:
+## 🔧 Environment Variables
 
-Python 3.9+
+All keys are read from environment variables. Locally they come from a `.env` file; on Azure they were set in **App Service → Configuration → Application settings**.
 
-Azure account with active subscription
+Copy `.env.example` to `.env` and replace each `****` with your own values:
 
-Azure services (see environment variables below)
-
-🔧 Environment Variables
-Create a .env file in the root directory with the following variables:
-
-env
-# Azure Cosmos DB
-COSMOS_CONNECTION_STRING=your_cosmos_connection_string
-
-# Azure Blob Storage
-BLOB_CONNECTION_STRING=your_blob_connection_string
+```env
+COSMOS_CONNECTION_STRING=****
+BLOB_CONNECTION_STRING=****
 BLOB_CONTAINER_NAME=media
-
-# Azure AI Services
-AZURE_SENTIMENT_KEY=your_sentiment_key
-AZURE_SENTIMENT_ENDPOINT=your_sentiment_endpoint
-
-# Azure Translator
-TRANSLATOR_KEY=your_translator_key
+AZURE_SENTIMENT_KEY=****
+AZURE_SENTIMENT_ENDPOINT=****
+TRANSLATOR_KEY=****
 TRANSLATOR_REGION=global
 TRANSLATOR_ENDPOINT=https://api.cognitive.microsofttranslator.com
-
-# Azure Computer Vision
-CV_KEY=your_computer_vision_key
-CV_ENDPOINT=your_computer_vision_endpoint
-
-# JWT Authentication (IMPORTANT)
-JWT_SECRET_KEY=your_super_secret_jwt_key_here
-
-# Flask
-FLASK_ENV=development
+CV_KEY=****
+CV_ENDPOINT=****
+JWT_SECRET_KEY=****
+FLASK_ENV=production
 PORT=5000
-📝 Copy .env.example to .env and fill in your own Azure credentials
+```
 
-🌐 Important: API Base URL Configuration
-For Local Development
-The frontend automatically detects the backend URL using:
+> The real `.env` is excluded by `.gitignore` and is never committed.
 
-javascript
-const API_BASE_URL = window.location.origin;
-This works because:
+---
 
-Localhost: http://127.0.0.1:5000
+## 🚀 How It Was Deployed to Azure
 
-Same origin: Frontend and backend are served from the same address
+1. **Created the Azure resources** – App Service (Python), Cosmos DB (NoSQL), Storage account with a `media` container, and AI services (Vision, Language, Translator).
+2. **Configured App Settings** – added every variable from `.env.example` under App Service → Configuration → Application settings.
+3. **Deployed the code** to App Service with Git:
+   ```bash
+   git remote add azure https://<app-name>.scm.azurewebsites.net/<app-name>.git
+   git push azure main
+   ```
+4. **Served over HTTPS** on the `*.azurewebsites.net` domain. Flask serves both the HTML and the API from the same origin, so the frontend uses `window.location.origin` and needed no URL changes.
 
-For Azure Deployment
-This project uses Flask to serve both frontend (HTML templates) and backend APIs from the same origin. Therefore, window.location.origin works without changes.
+---
 
-✅ No changes needed when deploying to Azure App Service - Flask serves everything from the same domain.
+## 🏃 Run Locally
 
-If you separate frontend and backend (React + Flask)
-If you deploy frontend and backend to different domains, you MUST change API_BASE_URL in all HTML files:
-
-javascript
-// Change from:
-const API_BASE_URL = window.location.origin;
-
-// To:
-const API_BASE_URL = 'https://your-backend.azurewebsites.net';
-Deployment Scenarios
-Deployment Type	API_BASE_URL Setting	Change Required
-Local development (Flask serves both)	window.location.origin	❌ No
-Azure App Service (Flask serves both)	window.location.origin	❌ No
-Frontend (static hosting) + Backend (Azure) separate	'https://your-api.azurewebsites.net'	✅ Yes
-Different ports (React on 3000, Flask on 5000)	'http://localhost:5000'	✅ Yes
-Quick Find & Replace for All Files
-If you need to change the API URL, run this PowerShell command:
-
-powershell
-Get-ChildItem -Path "Templates\*.html" | ForEach-Object {
-    (Get-Content $_.FullName -Raw) -replace "window\.location\.origin", "'https://your-new-url.azurewebsites.net'" | Set-Content $_.FullName -NoNewline
-}
-🔐 How JWT Works in This Project
-What is JWT?
-JSON Web Token (JWT) is used for secure authentication between frontend and backend.
-
-How it's implemented:
-Step	Description
-1. Registration/Login	User credentials are verified
-2. Token Generation	Server creates a signed JWT with user info
-3. Token Storage	Frontend stores token in localStorage
-4. API Requests	Token sent in Authorization: Bearer <token> header
-5. Verification	Server validates token before processing requests
-6. Expiry	Token expires after 24 hours, requiring re-login
-Token Payload Structure:
-json
-{
-    "user_id": "user_abc123",
-    "email": "user@example.com",
-    "role": "consumer",
-    "exp": 1735689600
-}
-Why JWT?
-✅ Stateless authentication
-
-✅ No session storage needed
-
-✅ Works across multiple servers
-
-✅ Secure with secret key signing
-
-✅ Built-in expiration
-
-🏃 Local Development
-1. Clone the repository
-bash
-git clone https://github.com/Eru0705/Scalable.git
-cd Scalable
-2. Create virtual environment
-bash
+```bash
+git clone https://github.com/Eru0705/Pictor.git
+cd Pictor
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-3. Install dependencies
-bash
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-4. Set up environment variables
-bash
-cp .env.example .env
-# Edit .env with your Azure credentials
-# IMPORTANT: Generate a strong JWT_SECRET_KEY
-5. Generate a secure JWT Secret Key (optional but recommended)
-python
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-6. Run the application
-bash
+cp .env.example .env            # then fill in your Azure values
 python app.py
-7. Open your browser
-Navigate to http://127.0.0.1:5000
+```
 
-☁️ Azure Deployment
-Deploy to Azure App Service
-Create Azure resources:
+Open http://127.0.0.1:5000
 
-App Service (Linux or Windows)
+Generate a JWT secret with:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
 
-Cosmos DB (NoSQL API)
+`checking.py` seeds two test users (one consumer, one creator) into Cosmos DB.
 
-Blob Storage account
+---
 
-Cognitive Services (Language, Translator, Computer Vision)
+## 🔄 API Endpoints
 
-Set environment variables in Azure App Service:
+| Endpoint | Method | JWT | Role |
+|----------|--------|-----|------|
+| `/api/login` | POST | ❌ | All |
+| `/api/register` | POST | ❌ | All |
+| `/api/feed` | GET | ✅ | Consumer |
+| `/api/like` | POST | ✅ | Consumer |
+| `/api/save` | POST | ✅ | Consumer |
+| `/api/follow` | POST | ✅ | Consumer |
+| `/api/creator/upload` | POST | ✅ | Creator |
+| `/api/creator/posts` | GET | ✅ | Creator |
+| `/api/user/profile` | GET | ✅ | Both |
+| `/api/user/saved` | GET | ✅ | Consumer |
+| `/api/user/liked` | GET | ✅ | Consumer |
 
-Go to Configuration → Application settings
+---
 
-Add all variables from .env.example
+## 📁 Project Structure
 
-Important: Set JWT_SECRET_KEY in Azure App Settings
-
-Deploy using Git:
-
-bash
-git remote add azure https://your-app-name.scm.azurewebsites.net/pictor-app.git
-git push azure main
-📁 Project Structure
-text
-SASS/
-├── Templates/           # Frontend HTML files
+```
+Pictor/
+├── Templates/                 # Frontend pages
 │   ├── login.html
 │   ├── consumer.html
 │   ├── consumer_registration.html
@@ -228,67 +173,16 @@ SASS/
 │   ├── consumer_search.html
 │   ├── creator.html
 │   └── creator_registration.html
-├── app.py              # Main Flask application
-├── requirements.txt    # Python dependencies
-├── .env.example        # Environment variables template
-└── README.md           # This file
-🔒 Security Notes
-Aspect	Implementation
-Authentication	JWT with 24-hour expiration
-Passwords	Hashed using SHA-256
-Secrets	Stored as environment variables, never in code
-API Security	Token validation on protected endpoints
-Role-Based Access	Consumers and creators have different permissions
-CORS	Configured for cross-origin requests
-.gitignore	.env excluded from version control
-Important Security Reminders:
-⚠️ Never commit .env to version control
-
-⚠️ Change the default JWT_SECRET_KEY in production
-
-⚠️ Use HTTPS in production (Azure provides this by default)
-
-⚠️ Rotate JWT secret periodically
-
-## 🔄 API Endpoints (JWT Protected)
-
-| Endpoint | Method | JWT Required | Role |
-|----------|--------|--------------|------|
-| `/api/login` | POST | ❌ No | All |
-| `/api/register` | POST | ❌ No | All |
-| `/api/feed` | GET | ✅ Yes | Consumer |
-| `/api/like` | POST | ✅ Yes | Consumer |
-| `/api/save` | POST | ✅ Yes | Consumer |
-| `/api/follow` | POST | ✅ Yes | Consumer |
-| `/api/creator/upload` | POST | ✅ Yes | Creator |
-| `/api/creator/posts` | GET | ✅ Yes | Creator |
-| `/api/user/profile` | GET | ✅ Yes | Both |
-| `/api/user/saved` | GET | ✅ Yes | Consumer |
-| `/api/user/liked` | GET | ✅ Yes | Consumer |
-
-## ⚠️ Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| API calls failing | Check `API_BASE_URL` is set to `window.location.origin` |
-| Cosmos DB connection error | Verify connection string in `.env` |
-| Blob upload fails | Check container name and permissions |
-| Sentiment analysis not working | Ensure Azure Language service key is valid |
-| JWT invalid error | Verify `JWT_SECRET_KEY` matches between login and verification |
-| Token expired | User needs to log in again (24-hour expiry) |
-
----
-
-## 📝 License
-
-This project was developed as part of coursework at Ulster University.
+├── app.py                     # Flask app + Azure integrations
+├── checking.py                # Seeds test users into Cosmos DB
+├── requirements.txt
+├── .env.example               # Env template (keys masked as ****)
+├── Poudel-E1 Scalable.mp4     # Demo video of the Azure-hosted app
+└── README.md
+```
 
 ---
 
 ## 👨‍💻 Author
 
-**Eru0705**
-
----
-
-
+**Eru Poudel** ([@Eru0705](https://github.com/Eru0705)) · MSc Computer Science, Ulster University
